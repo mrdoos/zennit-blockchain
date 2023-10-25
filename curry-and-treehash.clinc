@@ -1,7 +1,7 @@
 (
   ;; The code below is used to calculate of the tree hash of a curried function
   ;; without actually doing the curry, and using other optimization tricks
-  ;; like unrolling `sha256tree`.
+  ;; like unrolling `shatree`.
 
   (defconstant ONE 1)
   (defconstant TWO 2)
@@ -63,10 +63,30 @@
   ;;
   ;; Note that from a user's perspective the hashes passed in here aren't simply
   ;; the hashes of the desired parameters, but their treehash representation since
-  ;; that's the form we're assuming they take in the acutal curried program.
+  ;; that's the form we're assuming they take in the actual curried program.
 
   (defun puzzle-hash-of-curried-function (function-hash . reversed-curry-parameter-hashes)
      (tree-hash-of-apply function-hash
                          (build-curry-list reversed-curry-parameter-hashes (sha256 ONE ONE)))
   )
+
+  (defconstant b32 32)
+
+  (defun-inline size_b32 (var)
+    (= (strlen var) b32)
+  )
+
+  (defun calculate_coin_id (parent puzzlehash amount)
+    (if (all (size_b32 parent) (size_b32 puzzlehash) (> amount -1))
+      (sha256 parent puzzlehash amount)
+      (x)
+    )
+  )
+
+  ; takes a lisp tree and returns the hash of it
+  (defun shatree (TREE)
+        (if (l TREE)
+            (sha256 2 (shatree (f TREE)) (shatree (r TREE)))
+            (sha256 1 TREE)))
+
 )
