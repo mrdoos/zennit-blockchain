@@ -1,66 +1,17 @@
-import { PoolsStorageEncoded } from './api/io'
-import { StoreFilesContent, UserNodesStorage } from './api/types'
-import { DEFAULT_ETH_HD_MODE } from './ethereum/const'
-import { DEFAULT_LOCALE } from './i18n/const'
-import { DEFAULT_MIDGARD_URLS } from './midgard/const'
-import { DEFAULT_THORNODE_API_URLS, DEFAULT_THORNODE_RPC_URLS } from './thorchain/const'
+import { ApiUrls } from '../api/types'
+import { envOrDefault } from '../utils/env'
 
-export const ASGARDEX_IDENTIFIER = 999
+// expose env (needed to access ENVs by `envOrDefault`) in `main` thread)
+require('dotenv').config()
 
-// Thorname for affialiate address
-export const ASGARDEX_THORNAME = 'dx'
+const TESTNET_URL = envOrDefault(process.env.REACT_APP_MIDGARD_TESTNET_URL, 'https://testnet.midgard.thorchain.info')
 
-// Affilaite Fee in basis points
-export const ASGARDEX_AFFILIATE_FEE = 10
+const STAGENET_URL = envOrDefault(process.env.REACT_APP_MIDGARD_STAGENET_URL, 'https://stagenet-midgard.ninerealms.com')
 
-// Header key for 9R endpoints
-export const NINE_REALMS_CLIENT_HEADER = 'x-client-id'
+const MAINNET_URL = envOrDefault(process.env.REACT_APP_MIDGARD_MAINNET_URL, 'https://midgard.ninerealms.com')
 
-export enum ExternalUrl {
-  DOCS = 'https://docs.thorchain.org',
-  DISCORD = 'https://discord.gg/pHcS67yX7Z',
-  GITHUB_REPO = `https://github.com/asgardex/asgardex-desktop`,
-  GITHUB_RELEASE = `https://github.com/asgardex/asgardex-desktop/releases/tag/v`,
-  TWITTER = 'https://twitter.com/asgardex'
-}
-
-// increase it by `1` if you want to ignore previous version of `UserNodesStorage`
-const USER_NODES_STORAGE_VERSION = '1'
-
-export const USER_NODES_STORAGE_DEFAULT: UserNodesStorage = {
-  version: USER_NODES_STORAGE_VERSION,
-  mainnet: [],
-  stagenet: [],
-  testnet: []
-}
-
-// increase it by `1` if you want to ignore previous version of `common` storage
-const POOLS_STORAGE_VERSION = '1'
-
-const POOLS_STORAGE_DEFAULT: PoolsStorageEncoded = {
-  version: POOLS_STORAGE_VERSION,
-  watchlists: {
-    mainnet: [],
-    stagenet: [],
-    testnet: []
-  }
-}
-
-// increase it by `1` if you want to ignore previous version of `common` storage
-const COMMON_STORAGE_VERSION = '1'
-/**
- * When adding a new store file do not forget to expose
- * public api for it at src/main/preload.ts
- */
-export const DEFAULT_STORAGES: StoreFilesContent = {
-  common: {
-    version: COMMON_STORAGE_VERSION,
-    ethDerivationMode: DEFAULT_ETH_HD_MODE,
-    locale: DEFAULT_LOCALE,
-    midgard: DEFAULT_MIDGARD_URLS,
-    thornodeApi: DEFAULT_THORNODE_API_URLS,
-    thornodeRpc: DEFAULT_THORNODE_RPC_URLS
-  },
-  userNodes: USER_NODES_STORAGE_DEFAULT,
-  pools: POOLS_STORAGE_DEFAULT
+export const DEFAULT_MIDGARD_URLS: ApiUrls = {
+  mainnet: MAINNET_URL,
+  stagenet: STAGENET_URL,
+  testnet: TESTNET_URL
 }
