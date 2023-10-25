@@ -1,54 +1,63 @@
-# RRZT-
-**Press Release: Launch of the New RRZT App Engine for Zennit Crypto Jewel**  **Date:** October 24, 2023  Zennit Mining's team is delighted to announce the launch of the new RRZT application engine, specially designed for the Zennit community. This exciting development marks a significant step in our journey to provide an exceptional cryptocurrency
-# Zennit DApp Python Lightweight Engine
+cryptocoin
+----------
 
-Welcome to the Zennit DApp Python Lightweight Engine repository! This engine provides a streamlined and efficient solution for interacting with the Zennit blockchain. Whether you're a developer, miner, or trader, this engine simplifies the process of integrating your applications with the Zennit ecosystem.
+A JavaScript library to allow you to use crypto currencies in the browser.
 
-## Features
+**NOTE:** It's undecided if this module will be used going forward since much of the innovation is happening on the individual module level.
 
-- **Efficiency:** Our Python engine is designed to be lightweight, ensuring fast and smooth interactions with the Zennit blockchain.
+- **Active Development:** https://github.com/cryptocoinjs
+- **Documentation:** http://cryptocoinjs.com
 
-- **Simplicity:** The engine's intuitive interface allows developers to seamlessly integrate Zennit functionalities into their decentralized applications (DApps).
 
-- **Flexibility:** Whether you're mining Zennit, conducting transactions, or performing complex smart contract operations, this engine supports a wide range of Zennit-related activities.
+Install
+-------
 
-## Getting Started
+### Node.js/Browserify
 
-To get started with the Zennit DApp Python Lightweight Engine, follow these steps:
+    npm install --save cryptocoin
 
-1. **Installation:**
-   ```
-   pip install zennit-dapp-engine
-   ```
+### Component
 
-2. **Usage:**
-   ```python
-   from zennit_dapp_engine import ZennitEngine
+    component install cryptocoinjs/cryptocoin
 
-   # Initialize the engine
-   engine = ZennitEngine()
 
-   # Example: Get Zennit balance for a specific address
-   address = "0xYourZennitAddress"
-   balance = engine.get_zennit_balance(address)
-   print(f"Zennit balance for {address}: {balance} Zennit")
-   ```
+### Bower
 
-3. **Explore Zennit Functionalities:**
-   - **Mining:** Start mining Zennit by utilizing the mining functions provided by the engine.
-   - **Transactions:** Send and receive Zennit easily with transaction functionalities.
-   - **Smart Contracts:** Interact with Zennit smart contracts effortlessly.
+    bower install cryptocoin
 
-## Contributing
 
-We welcome contributions from the community. If you encounter issues or have suggestions for improvements, please feel free to open an issue or create a pull request. Together, let's enhance the Zennit DApp Python Lightweight Engine for everyone!
+### Script
 
-## License
+```html
+<script src="/path/to/cryptocoin.min.js"></script>
+```
 
-This project is licensed under the APACHE
-License - see the [LICENSE](LICENSE) file for details.
 
----
+Contributions
+-------------
 
-Happy coding and happy mining with the Zennit DApp Python Lightweight Engine! 🚀✨
-.<img src="_95438bb6-f45b-4211-a355-6d8d88a882c6.jpeg" width="600" height="600">
+Please read this: https://github.com/cryptocoinjs/cryptocoin/wiki/Contributor-Guidelines
+
+
+License
+-------
+
+This library is free and open-source software released under the MIT
+license.
+
+
+
+Copyright
+---------
+
+BitcoinJS (c) 2011-2012 Stefan Thomas  
+Released under MIT license  
+http://bitcoinjs.org/
+
+JSBN (c) 2003-2005 Tom Wu  
+Released under BSD license  
+http://www-cs-students.stanford.edu/~tjw/jsbn/
+
+CryptoJS (c) 2009–2012 by Jeff Mott  
+Released under New BSD license  
+http://code.google.com/p/crypto-js/
