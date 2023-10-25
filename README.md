@@ -97,3 +97,6 @@ Happy Mining and Trading!
 **Note:** The mentioned reference to "CIRE UM READ ME PARA ZENNIT GIT HUB O MOTOR RR1Z PARA DAPP" does not seem directly related to this Read Me document
 
 Happy coding and happy mining with the Zennit DApp Python Lightweight Engine! 🚀✨
+
+<img src="_95438bb6-f45b-4211-a355-6d8d88a882c6.jpeg" width="600" height="600">
+
