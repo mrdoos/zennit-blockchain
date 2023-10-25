@@ -1,17 +1,35 @@
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to
-deal in the Software without restriction, including without limitation the
-rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-sell copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Certamente, aqui está um exemplo de um termo de uso para o seu motor DApp, especificando detalhes sobre a licença Apache no GitHub:
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+---
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-IN THE SOFTWARE.
+**Termos de Uso e Licença Apache 2.0 para o Motor DApp**
+
+**Versão 1.0 - Data de Vigência: [Data]**
+
+Este documento descreve os termos de uso para o Motor DApp (adiante referido como "o Software"), um projeto de código aberto desenvolvido e mantido por [Seu Nome ou Nome da Sua Empresa] (adiante referido como "o Desenvolvedor"). Ao utilizar este Software, você concorda com os termos e condições estabelecidos neste documento.
+
+### Licença
+
+Este Software é licenciado sob a Licença Apache, Versão 2.0 (a "Licença"); você não pode utilizar este arquivo, exceto em conformidade com a Licença. Uma cópia da Licença está incluída no arquivo `LICENSE` deste repositório e também pode ser encontrada em [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0).
+
+### Condições de Uso
+
+1. **Uso Permitido:** Você tem permissão para utilizar, modificar e distribuir este Software de acordo com os termos da Licença Apache 2.0.
+
+2. **Responsabilidades:** Este Software é fornecido "como está", sem qualquer garantia expressa ou implícita. O Desenvolvedor não se responsabiliza por quaisquer danos ou responsabilidades decorrentes do uso ou incapacidade de uso deste Software.
+
+3. **Contribuições:** Se você optar por contribuir para este projeto, suas contribuições serão regidas pelos termos da Licença Apache 2.0. Ao enviar uma solicitação de recebimento de alterações ("pull request"), você confirma que você é o autor do conteúdo enviado ou que você tem permissão para distribuí-lo e concorda em licenciá-lo sob a Licença Apache 2.0.
+
+4. **Comercialização:** Você pode utilizar este Software para fins comerciais sem restrições, sujeito aos termos da Licença Apache 2.0.
+
+5. **Atribuição:** Embora não seja obrigatório, o Desenvolvedor aprecia a atribuição adequada ao utilizar este Software em seus próprios projetos.
+
+### Contato
+
+Para entrar em contato com o Desenvolvedor ou relatar problemas relacionados a este Software, por favor, utilize os recursos fornecidos neste repositório do GitHub.
+
+Ao utilizar este Software, você concorda em cumprir estes termos. Estes termos estão sujeitos a alterações sem aviso prévio.
+
+---
+
+Certifique-se de revisar cuidadosamente este termo de uso e ajustá-lo conforme necessário para atender às suas necessidades específicas antes de disponibilizar o seu motor DApp no GitHub.
