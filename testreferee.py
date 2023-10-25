@@ -231,15 +231,17 @@ async def test_rps(amove, bmove, setup_sim):
         mycoin = (await client.get_coin_records_by_puzzle_hashes([acs_hash], include_spent_coins = False))[0].coin
         # make a coin for a game
         referee = bootstrap_referee(mycoin.name(), MOD_A.tree_hash(), 2, total, 1000, 50, alice_puzzle, bob_puzzle)
-        (status, err) = await client.push_tx(SpendBundle([CoinSpend(mycoin, acs, Program.to([[51, referee.coin.puzzle_hash, 
+        (status, err) = await client.push_tx(SpendBundle([CoinSpend(mycoin, acs, Program.to([[51, referee.coin.puzzle_hash,
                 referee.coin.amount]]))], G2Element()))
         assert status == MempoolInclusionStatus.SUCCESS
         await sym.farm_block()
         savepoint = sym.block_height
         # Alice accuse Bob of cheating (negative test, should fail)
         solution, accuse = referee.SpendAccuse('alice')
-        (status, err) = await client.push_tx(SpendBundle([CoinSpend(referee.coin, referee.get_puzzle(), 
+        (status, err) = await client.push_tx(SpendBundle([CoinSpend(referee.coin, referee.get_puzzle(),
                 solution)], G2Element()))
+        print(solution)
+        print(accuse.get_puzzle())
         assert status == MempoolInclusionStatus.FAILED
         assert err == Err.ASSERT_MY_PARENT_ID_FAILED
         # timeout too early fail

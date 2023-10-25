@@ -1,5 +1,5 @@
 # Attribution
 
-Source files from https://github.com/Chia-Network/bridge
+Source files from https://github.com/bramcohen/chia-gaming
 
-Collected here to be used for testing compiler optimizations
+Collected here as a standard compiler regression test
