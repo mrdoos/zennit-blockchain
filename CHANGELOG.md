@@ -1,45 +1,110 @@
-# clvm_tools_rs Changelog
+# Changelog
 
-## 0.1.34
-### Fixed
-- Fixed chialisp compilation issues
+All notable changes to this project will be documented in this file.
 
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.1.33
-### Changed
-- Set macOS deployment target to 10.14
-- Ensure we flush streams in case the runtime system doesn't get a chance
-### Fixed
-- Fix erroneous detection of recursion when two similar inline siblings
-
-
-## 0.1.32
-Skipped
-
-## 0.1.31 Chia CLVM Tools Rust 2023-04-17
+## [3.8.0] - 2023-10-09
 
 ### Added
+    - Add `jq` to lite image
 
-- defconst was added.
-- hierarchial debug was added.
-- clvm command linetools: supported more command line features in both compiler front-ends.
+## [3.7.0] - 2023-10-09
 
-## 0.1.35 
+### Changed
+    - Bump SDK versions
 
-- embed-file was added.
-- &rest arguments.
-- new bls and sec256 operators.
+## [3.6.0] - 2023-10-03
 
-## 0.1.36
+### Added
+    - Add `cargo ledger setup` step in full/legacy images so users don't have to do it.
 
-- modern lambda added
-- updated some internal data strucutres and call interfaces to support env variable renaming at during closure generation / lambda capture, or any step during transformation.
+### Changed
+    - Update curl installation step in full image (work around of https://github.com/curl/curl/issues/11917).
+    - Remove curl installation from dev-tools image (already installed in full image).
 
-## 0.1.37
+## [3.5.0] - 2023-09-18
 
-- First npm publish with a Program-like object reminiscent of
-  chia.types.blockchain_format.program.Program
+### Changed
+    - Use Rust nightly toolchain as default
 
-## 0.1.38
+## [3.4.0] - 2023-09-15
 
-- Uncurry fix, typescript type improvements for npm personality.
+### Changed
+    - Bump Stax SDK versions
+    - Bump Rust stable version to 1.72.0
+
+### Added
+    - cargo-ledger version 1.1.0
+    - llvm15 tools
+
+## [3.3.0] - 2023-09-01
+
+### Changed
+    - Bump SDK versions
+
+## [3.2.9] - 2023-08-18
+
+### Changed
+    - Bump SDK versions
+
+## [3.2.8] - 2023-08-09
+
+### Fixed
+    - devtools: removed the Python dependencies deletion
+    - README: more instructions on Boilerplate testing
+
+## [3.2.7] - 2023-08-09
+
+### Changed
+    - Add mesa-dri-gallium package to dev-tools docker
+
+## [3.2.6] - 2023-08-02
+
+### Changed
+    - Use directly pypi.org instead of test.pypi.org for ragger
+
+## [3.2.5] - 2023-07-28
+
+### Changed
+    - Bump NanoX & Stax SDK versions
+
+## [3.2.4] - 2023-07-21
+
+### Changed
+    - devtools : keep musl-dev and install curl for cargo ledger compatibility.
+
+### Fixed
+    - CI : search if last changelog version exists in tags of all pushed images (full, legacy, lite, dev-tools), not just app-builder.
+
+## [3.2.3] - 2023-07-07
+
+### Changed
+    - Add fonts to devtools image so that fonts in Qt apps are properly displayed.
+
+## [3.2.2] - 2023-06-29
+
+### Changed
+    - Bump NanoX SDK version
+
+## [3.2.1] - 2023-06-27
+
+### Changed
+    - Add gzip package for Lcov
+
+## [3.2.0] - 2023-06-23
+
+### Changed
+    - Bump SDK versions
+
+## [3.1.0] - 2023-06-19
+
+### Changed
+    - Legacy image : Rust : freeze stable version and add nightly version. Add rust-src for nightly version.
+
+## [3.0.0] - 2023-06-19
+
+### Changed
+    - Full image : Rust : freeze stable version and add nightly version. Add rust-src for nightly version.
+    - Add changelog file.
