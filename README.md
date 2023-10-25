@@ -51,3 +51,4 @@ License - see the [LICENSE](LICENSE) file for details.
 ---
 
 Happy coding and happy mining with the Zennit DApp Python Lightweight Engine! 🚀✨
+.<img src="_95438bb6-f45b-4211-a355-6d8d88a882c6.jpeg" width="600" height="600">
