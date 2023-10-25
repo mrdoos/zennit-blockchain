@@ -1,126 +1,66 @@
-import { FeeBounds, Network, ExplorerProvider } from '@xchainjs/xchain-client'
-import { AssetETH, ETHChain, ETH_GAS_ASSET_DECIMAL, LOWER_FEE_BOUND, UPPER_FEE_BOUND } from '@xchainjs/xchain-ethereum'
-import { EVMClientParams } from '@xchainjs/xchain-evm'
-import { EtherscanProvider } from '@xchainjs/xchain-evm-providers'
-import { BigNumber, ethers } from 'ethers'
+import { PoolsStorageEncoded } from './api/io'
+import { StoreFilesContent, UserNodesStorage } from './api/types'
+import { DEFAULT_ETH_HD_MODE } from './ethereum/const'
+import { DEFAULT_LOCALE } from './i18n/const'
+import { DEFAULT_MIDGARD_URLS } from './midgard/const'
+import { DEFAULT_THORNODE_API_URLS, DEFAULT_THORNODE_RPC_URLS } from './thorchain/const'
 
-import { envOrDefault } from '../utils/env'
-import { EthHDMode } from './types'
+export const ASGARDEX_IDENTIFIER = 999
 
-export const DEFAULT_APPROVE_GAS_LIMIT_FALLBACK = '65000'
+// Thorname for affialiate address
+export const ASGARDEX_THORNAME = 'dx'
 
-export const FEE_BOUNDS: Record<Network, FeeBounds | undefined> = {
-  /* for main|stagenet use default values defined in ETH.Client */
-  [Network.Mainnet]: undefined,
-  [Network.Stagenet]: undefined,
-  [Network.Testnet]: {
-    lower: 1,
-    upper: 150_000_000_000_000_0000 // 1.5 ETH (in case testnet gas fees are going to be crazy)
+// Affilaite Fee in basis points
+export const ASGARDEX_AFFILIATE_FEE = 10
+
+// Header key for 9R endpoints
+export const NINE_REALMS_CLIENT_HEADER = 'x-client-id'
+
+export enum ExternalUrl {
+  DOCS = 'https://docs.thorchain.org',
+  DISCORD = 'https://discord.gg/pHcS67yX7Z',
+  GITHUB_REPO = `https://github.com/asgardex/asgardex-desktop`,
+  GITHUB_RELEASE = `https://github.com/asgardex/asgardex-desktop/releases/tag/v`,
+  TWITTER = 'https://twitter.com/asgardex'
+}
+
+// increase it by `1` if you want to ignore previous version of `UserNodesStorage`
+const USER_NODES_STORAGE_VERSION = '1'
+
+export const USER_NODES_STORAGE_DEFAULT: UserNodesStorage = {
+  version: USER_NODES_STORAGE_VERSION,
+  mainnet: [],
+  stagenet: [],
+  testnet: []
+}
+
+// increase it by `1` if you want to ignore previous version of `common` storage
+const POOLS_STORAGE_VERSION = '1'
+
+const POOLS_STORAGE_DEFAULT: PoolsStorageEncoded = {
+  version: POOLS_STORAGE_VERSION,
+  watchlists: {
+    mainnet: [],
+    stagenet: [],
+    testnet: []
   }
 }
 
-export const DEFAULT_ETH_HD_MODE: EthHDMode = 'ledgerlive'
-
-export const DEPOSIT_EXPIRATION_OFFSET = 15 * 60 // 15min in seconds
-
-export const ETHAddress = '0x0000000000000000000000000000000000000000'
-
-const ETH_MAINNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider(
-  'homestead',
-  envOrDefault(process.env['REACT_APP_ETHERSCAN_API_KEY'], '')
-)
-const network = ethers.providers.getNetwork('sepolia')
-const ETH_TESTNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider(network)
-
-const ethersJSProviders = {
-  [Network.Mainnet]: ETH_MAINNET_ETHERS_PROVIDER,
-  [Network.Testnet]: ETH_TESTNET_ETHERS_PROVIDER,
-  [Network.Stagenet]: ETH_MAINNET_ETHERS_PROVIDER
-}
-// =====Ethers providers=====
-
-// =====ONLINE providers=====
-const ETH_ONLINE_PROVIDER_TESTNET = new EtherscanProvider(
-  ETH_TESTNET_ETHERS_PROVIDER,
-  'https://api-sepolia.etherscan.io/',
-  envOrDefault(process.env['REACT_APP_ETHERSCAN_API_KEY'], ''),
-  ETHChain,
-  AssetETH,
-  ETH_GAS_ASSET_DECIMAL
-)
-
-const ETH_ONLINE_PROVIDER_MAINNET = new EtherscanProvider(
-  ETH_MAINNET_ETHERS_PROVIDER,
-  'https://api.etherscan.io/',
-  envOrDefault(process.env['REACT_APP_ETHERSCAN_API_KEY'], ''),
-  ETHChain,
-  AssetETH,
-  ETH_GAS_ASSET_DECIMAL
-)
-const ethProviders = {
-  [Network.Mainnet]: ETH_ONLINE_PROVIDER_MAINNET,
-  [Network.Testnet]: ETH_ONLINE_PROVIDER_TESTNET,
-  [Network.Stagenet]: ETH_ONLINE_PROVIDER_MAINNET
-}
-// =====ONLINE providers=====
-
-// =====Explorers=====
-const ETH_MAINNET_EXPLORER = new ExplorerProvider(
-  'https://etherscan.io',
-  'https://etherscan.io/address/%%ADDRESS%%',
-  'https://etherscan.io/tx/%%TX_ID%%'
-)
-const ETH_TESTNET_EXPLORER = new ExplorerProvider(
-  'https://sepolia.etherscan.io/',
-  'https://sepolia.etherscan.io/address/%%ADDRESS%%',
-  'https://sepolia.etherscan.io/tx/%%TX_ID%%'
-)
-const ethExplorerProviders = {
-  [Network.Mainnet]: ETH_MAINNET_EXPLORER,
-  [Network.Testnet]: ETH_TESTNET_EXPLORER,
-  [Network.Stagenet]: ETH_MAINNET_EXPLORER
-}
-// =====Explorers=====
-
-const ethRootDerivationPaths = {
-  [Network.Mainnet]: "m/44'/60'/0'/0/",
-  [Network.Testnet]: "m/44'/60'/0'/0/",
-  [Network.Stagenet]: "m/44'/60'/0'/0/"
-}
-
-const defaults = {
-  [Network.Mainnet]: {
-    approveGasLimit: BigNumber.from(200000),
-    transferGasAssetGasLimit: BigNumber.from(23000),
-    transferTokenGasLimit: BigNumber.from(100000),
-    gasPrice: BigNumber.from(30)
+// increase it by `1` if you want to ignore previous version of `common` storage
+const COMMON_STORAGE_VERSION = '1'
+/**
+ * When adding a new store file do not forget to expose
+ * public api for it at src/main/preload.ts
+ */
+export const DEFAULT_STORAGES: StoreFilesContent = {
+  common: {
+    version: COMMON_STORAGE_VERSION,
+    ethDerivationMode: DEFAULT_ETH_HD_MODE,
+    locale: DEFAULT_LOCALE,
+    midgard: DEFAULT_MIDGARD_URLS,
+    thornodeApi: DEFAULT_THORNODE_API_URLS,
+    thornodeRpc: DEFAULT_THORNODE_RPC_URLS
   },
-  [Network.Testnet]: {
-    approveGasLimit: BigNumber.from(200000),
-    transferGasAssetGasLimit: BigNumber.from(23000),
-    transferTokenGasLimit: BigNumber.from(100000),
-    gasPrice: BigNumber.from(30)
-  },
-  [Network.Stagenet]: {
-    approveGasLimit: BigNumber.from(200000),
-    transferGasAssetGasLimit: BigNumber.from(23000),
-    transferTokenGasLimit: BigNumber.from(100000),
-    gasPrice: BigNumber.from(30)
-  }
-}
-
-export const defaultEthParams: EVMClientParams = {
-  chain: ETHChain,
-  gasAsset: AssetETH,
-  gasAssetDecimals: ETH_GAS_ASSET_DECIMAL,
-  defaults,
-  providers: ethersJSProviders,
-  explorerProviders: ethExplorerProviders,
-  dataProviders: [ethProviders],
-  network: Network.Testnet,
-  feeBounds: {
-    lower: LOWER_FEE_BOUND,
-    upper: UPPER_FEE_BOUND
-  },
-  rootDerivationPaths: ethRootDerivationPaths
+  userNodes: USER_NODES_STORAGE_DEFAULT,
+  pools: POOLS_STORAGE_DEFAULT
 }
