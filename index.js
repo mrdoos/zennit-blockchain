@@ -1,18 +1,41 @@
+const test = require('tape')
+const base58 = require('../')
 
-var me = module.exports
+const fixtures = require('./fixtures.json')
 
-me.VERSION = require('../package.json').version
+test('base58', function (t) {
+  t.test('encode', function (t) {
+    fixtures.valid.forEach(function (f) {
+      t.test('can encode ' + f.hex, function (t) {
+        const actual = base58.encode(Buffer.from(f.hex, 'hex'))
+        t.equal(actual, f.string)
+        t.end()
+      })
+    })
 
-var Crypto = {
-  sha256: require('sha256'),
-  ripemd160: require('ripemd160')
-}
+    t.end()
+  })
 
-me.Address = require('btc-address')
-me.Key = require('eckey')
-me.ECDSA = require('ecdsa')
-me.BigInteger = require('bigi')
-me.Crypto = Crypto
-me.base58 = require('bs58')
-me.convertHex = require('convert-hex')
-me.secureRandom = require('secure-random')
+  t.test('decode', function (t) {
+    fixtures.valid.forEach(function (f) {
+      t.test('can decode ' + f.string, function (t) {
+        const actual = Buffer.from(base58.decode(f.string)).toString('hex')
+        t.same(actual, f.hex)
+        t.end()
+      })
+    })
+
+    fixtures.invalid.forEach(function (f) {
+      t.test('throws on ' + f.description, function (t) {
+        t.throws(function () {
+          base58.decode(f.string)
+        }, /^Error: Non-base58 character$/)
+        t.end()
+      })
+    })
+
+    t.end()
+  })
+
+  t.end()
+})
