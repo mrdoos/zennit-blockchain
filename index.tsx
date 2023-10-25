@@ -1,39 +1,23 @@
-import { DEFAULT_POLLING_INTERVAL } from './constants';
-import { configureStore, history } from './store/configureStore';
-import { ThemeProvider, ColorModeProvider } from '@stacks/ui';
-import React, { Fragment } from 'react';
-import { render } from 'react-dom';
-import { AppContainer as ReactHotAppContainer } from 'react-hot-loader';
-import { DefaultOptions, QueryClient, QueryClientProvider } from 'react-query';
+import React from 'react'
 
-const config: DefaultOptions['queries'] = {
-  refetchInterval: DEFAULT_POLLING_INTERVAL,
-  keepPreviousData: true,
-  refetchOnWindowFocus: true,
-  staleTime: 30_000,
-};
+import './index.css'
+import { createRoot } from 'react-dom/client'
 
-const queryClient = new QueryClient({
-  defaultOptions: { queries: config },
-});
+import { register9Rheader } from '../shared/api/ninerealms'
+import { App } from './App'
+import * as serviceWorker from './serviceWorker'
 
-const { store, persistor } = configureStore();
+// Registers custom headers (9R endpoints only)
+register9Rheader()
 
-const AppContainer = (CONFIG.PLAIN_HMR ? Fragment : ReactHotAppContainer) as unknown as any;
+// React 18 introduces a new root API
+// @see https://reactjs.org/blog/2022/03/08/react-18-upgrade-guide.html#updates-to-client-rendering-apis
+const container = document.getElementById('root')
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const root = createRoot(container!) // createRoot(container!) if you use TypeScript
+root.render(<App />)
 
-document.addEventListener('DOMContentLoaded', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const Root = require('./pages/root').default;
-  render(
-    <ThemeProvider>
-      <ColorModeProvider defaultMode="dark">
-        <QueryClientProvider client={queryClient}>
-          <AppContainer>
-            <Root store={store} persistor={persistor} history={history} />
-          </AppContainer>
-        </QueryClientProvider>
-      </ColorModeProvider>
-    </ThemeProvider>,
-    document.getElementById('root')
-  );
-});
+// If you want your app to work offline and load faster, you can change
+// unregister() to register() below. Note this comes with some pitfalls.
+// Learn more about service workers: https://bit.ly/CRA-PWA
+serviceWorker.unregister()
