@@ -1,24 +1,11 @@
-export type WindowActiveState = 'focused' | 'blurred';
+import { ClientFunction } from 'testcafe'
 
-export type DelegationType = 'indefinite' | 'limited';
+export const pageUrl = '../build/index.html'
 
-export enum ApiResource {
-  Mempool = 'mempool',
-  Nonce = 'nonce',
-  DelegationStatus = 'delegation-status',
-  FeeRate = 'fee-rate',
-}
+export const getPageUrl = ClientFunction(() => window.location.href)
+export const getPageTitle = ClientFunction(() => document.title)
 
-declare global {
-  const CONFIG: {
-    NODE_ENV: 'development' | 'production' | 'test';
-    DEBUG_PROD: string;
-    STX_NETWORK: 'testnet' | 'mainnet';
-    PLAIN_HMR?: string;
-    START_HOT: boolean;
-    PORT?: number;
-    PULL_REQUEST?: string;
-    BRANCH_NAME?: string;
-    SHA?: string;
-  };
+export const assertNoConsoleErrors = async (t: TestController) => {
+  const { error } = await t.getBrowserConsoleMessages()
+  await t.expect(error).eql([])
 }
