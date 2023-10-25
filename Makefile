@@ -1,11 +1,6 @@
-clean:
-	rm -f dist/cryptocoin.js
-	rm -f dist/cryptocoin.min.js
-
-min: dist
-	node_modules/.bin/uglifyjs dist/cryptocoin.js -o dist/cryptocoin.min.js
-
-dist:
-	node_modules/.bin/browserify lib/index.js -o dist/cryptocoin.js -s cryptocoin
-
-.PHONY: dist min
+all:
+	cargo build --release --no-default-features
+	cargo build --release --target wasm32-unknown-unknown
+	wasm-pack build
+	npm link ./pkg
+	(cd mock-test && npm link clvm_tools_rs)
