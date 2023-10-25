@@ -1,0 +1,136 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+import { TxModalFooter } from '../send-stx/send-stx-modal-layout';
+import { Api } from '@api/api';
+import { ErrorLabel } from '@components/error-label';
+import { ErrorText } from '@components/error-text';
+import { generateRandomHexString } from '@crypto/key-generation';
+import { Modal } from '@modals/components/base-modal';
+import { ModalHeader } from '@modals/components/modal-header';
+import { ButtonGroup, Button, Box, Text, Input, color } from '@stacks/ui';
+import { StacksNode } from '@store/stacks-node';
+import { capitalize } from '@utils/capitalize';
+import { safeAwait } from '@utils/safe-await';
+import { useFormik } from 'formik';
+import React, { FC, useEffect, useRef, useState } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
+import * as yup from 'yup';
+
+interface AddNodeSettingsProps {
+  isOpen: boolean;
+  selectedNode?: StacksNode;
+
+  onUpdateNode(node: StacksNode): void;
+
+  onClose(): void;
+}
+
+export const UpsertStacksNodeSettingsModal: FC<AddNodeSettingsProps> = props => {
+  const { isOpen, selectedNode, onClose, onUpdateNode } = props;
+
+  const [loading, setLoading] = useState(false);
+
+  useHotkeys('esc', onClose, []);
+  const nameFieldRef = useRef<any>();
+  const form = useFormik({
+    initialValues: {
+      name: '',
+      url: '',
+    },
+    validationSchema: yup.object({
+      name: yup.string().max(64).required(),
+      url: yup.string().url().required(),
+    }),
+    async onSubmit() {
+      setLoading(true);
+      const [error, success] = await safeAwait(new Api(form.values.url).getNodeStatus());
+      if (error) {
+        setLoading(false);
+        form.setErrors({ url: 'Unable to connect to the node' });
+        return;
+      }
+      if (success && success.data.status === 'ready') {
+        onUpdateNode({ id: generateRandomHexString(), ...selectedNode, ...form.values });
+        onClose();
+        setLoading(false);
+      }
+    },
+  });
+
+  useEffect(() => {
+    if (!selectedNode) return form.resetForm();
+    void form.setValues(selectedNode);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, selectedNode]);
+
+  useEffect(() => {
+    if (isOpen) nameFieldRef.current?.focus();
+    if (!isOpen) return;
+    return () => form.resetForm();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
+  const changeVerb = selectedNode ? 'Edit' : 'Add';
+
+  const header = <ModalHeader onSelectClose={onClose}>{changeVerb} a node</ModalHeader>;
+  const footer = (
+    <TxModalFooter>
+      <ButtonGroup size="md">
+        <Button type="button" mode="tertiary" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button type="submit" isLoading={loading}>
+          {changeVerb} node
+        </Button>
+      </ButtonGroup>
+    </TxModalFooter>
+  );
+  return (
+    <Modal isOpen={isOpen} minWidth={['100%', '488px']} handleClose={onClose}>
+      <Box as="form" onSubmit={(e: React.FormEvent<HTMLDivElement>) => form.handleSubmit(e as any)}>
+        {header}
+        <Box p="extra-loose">
+          <Text color={color('text-body')} textStyle="body.small" lineHeight="20px">
+            Enter an address for a Stacks Blockchain API that proxies a Stacks node. Before using a
+            node, make sure you review and trust the host before configuring a new API.
+          </Text>
+          <Box mt="loose">
+            <Text textStyle="body.small.medium" as="label" {...{ htmlFor: 'name' }}>
+              Name
+            </Text>
+            <Input
+              ref={nameFieldRef}
+              mt="base-tight"
+              id="name"
+              onChange={form.handleChange}
+              value={form.values.name}
+              placeholder="Some API instance"
+            />
+            {form.touched.name && form.errors.name && (
+              <ErrorLabel>
+                <ErrorText>{capitalize(form.errors.name)}</ErrorText>
+              </ErrorLabel>
+            )}
+          </Box>
+          <Box mt="loose">
+            <Text textStyle="body.small.medium" as="label" {...{ htmlFor: 'url' }}>
+              URL
+            </Text>
+            <Input
+              placeholder="https://api.hiro.so"
+              mt="base-tight"
+              id="url"
+              onChange={form.handleChange}
+              value={form.values.url}
+            />
+            {form.touched.url && form.errors.url && (
+              <ErrorLabel>
+                <ErrorText>{capitalize(form.errors.url)}</ErrorText>
+              </ErrorLabel>
+            )}
+          </Box>
+        </Box>
+        {footer}
+      </Box>
+    </Modal>
+  );
+};
