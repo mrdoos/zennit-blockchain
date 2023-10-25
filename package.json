@@ -1,39 +1,25 @@
 {
-  "name": "bs58",
-  "version": "5.0.0",
-  "description": "Base 58 encoding / decoding",
-  "keywords": [
-    "base58",
-    "bitcoin",
-    "crypto",
-    "crytography",
-    "decode",
-    "decoding",
-    "encode",
-    "encoding",
-    "litecoin"
-  ],
-  "license": "MIT",
-  "devDependencies": {
-    "standard": "^16.0.4",
-    "tape": "^4.6.3"
+  "name": "stacks-wallet-inner-package",
+  "description": "Leather v4 — Participate in Stacking to earn bitcoin rewards",
+  "main": "./main.prod.js",
+  "author": {
+    "email": "info@blockstack.com",
+    "name": "Leather Wallet, LLC"
   },
-  "repository": {
-    "url": "https://github.com/cryptocoinjs/bs58",
-    "type": "git"
-  },
-  "files": [
-    "index.js",
-    "index.d.ts"
-  ],
-  "main": "index.js",
-  "types": "index.d.ts",
   "scripts": {
-    "standard": "standard",
-    "test": "npm run standard && npm run unit",
-    "unit": "tape test/index.js"
+    "electron-rebuild": "node -r ../internals/scripts/BabelRegister.js ../internals/scripts/ElectronRebuild.js",
+    "postinstall": "yarn electron-rebuild"
   },
+  "license": "MIT",
   "dependencies": {
-    "base-x": "^4.0.0"
+    "@ledgerhq/hw-transport-node-hid": "6.27.21",
+    "@stacks/network": "6.5.2",
+    "@stacks/stacking": "6.5.3",
+    "@stacks/transactions": "6.5.2",
+    "@stacks/wallet-sdk": "6.5.2",
+    "argon2-browser": "1.18.0"
+  },
+  "resolutions": {
+    "**/**/bitcoinjs-lib": "npm:noop-package@1.0.0"
   }
 }
