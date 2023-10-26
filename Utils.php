@@ -1,463 +1,385 @@
 <?php
 
-declare(strict_types=1);
+namespace GuzzleHttp;
 
-namespace GuzzleHttp\Psr7;
-
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\StreamInterface;
+use GuzzleHttp\Exception\InvalidArgumentException;
+use GuzzleHttp\Handler\CurlHandler;
+use GuzzleHttp\Handler\CurlMultiHandler;
+use GuzzleHttp\Handler\Proxy;
+use GuzzleHttp\Handler\StreamHandler;
 use Psr\Http\Message\UriInterface;
 
 final class Utils
 {
     /**
-     * Remove the items given by the keys, case insensitively from the data.
+     * Debug function used to describe the provided value type and class.
      *
-     * @param string[] $keys
+     * @param mixed $input
+     *
+     * @return string Returns a string containing the type of the variable and
+     *                if a class is provided, the class name.
      */
-    public static function caselessRemove(array $keys, array $data): array
+    public static function describeType($input): string
     {
-        $result = [];
+        switch (\gettype($input)) {
+            case 'object':
+                return 'object('.\get_class($input).')';
+            case 'array':
+                return 'array('.\count($input).')';
+            default:
+                \ob_start();
+                \var_dump($input);
+                // normalize float vs double
+                /** @var string $varDumpContent */
+                $varDumpContent = \ob_get_clean();
 
-        foreach ($keys as &$key) {
-            $key = strtolower($key);
+                return \str_replace('double(', 'float(', \rtrim($varDumpContent));
+        }
+    }
+
+    /**
+     * Parses an array of header lines into an associative array of headers.
+     *
+     * @param iterable $lines Header lines array of strings in the following
+     *                        format: "Name: Value"
+     */
+    public static function headersFromLines(iterable $lines): array
+    {
+        $headers = [];
+
+        foreach ($lines as $line) {
+            $parts = \explode(':', $line, 2);
+            $headers[\trim($parts[0])][] = isset($parts[1]) ? \trim($parts[1]) : null;
         }
 
-        foreach ($data as $k => $v) {
-            if (!is_string($k) || !in_array(strtolower($k), $keys)) {
-                $result[$k] = $v;
+        return $headers;
+    }
+
+    /**
+     * Returns a debug stream based on the provided variable.
+     *
+     * @param mixed $value Optional value
+     *
+     * @return resource
+     */
+    public static function debugResource($value = null)
+    {
+        if (\is_resource($value)) {
+            return $value;
+        }
+        if (\defined('STDOUT')) {
+            return \STDOUT;
+        }
+
+        return \GuzzleHttp\Psr7\Utils::tryFopen('php://output', 'w');
+    }
+
+    /**
+     * Chooses and creates a default handler to use based on the environment.
+     *
+     * The returned handler is not wrapped by any default middlewares.
+     *
+     * @return callable(\Psr\Http\Message\RequestInterface, array): \GuzzleHttp\Promise\PromiseInterface Returns the best handler for the given system.
+     *
+     * @throws \RuntimeException if no viable Handler is available.
+     */
+    public static function chooseHandler(): callable
+    {
+        $handler = null;
+
+        if (\defined('CURLOPT_CUSTOMREQUEST')) {
+            if (\function_exists('curl_multi_exec') && \function_exists('curl_exec')) {
+                $handler = Proxy::wrapSync(new CurlMultiHandler(), new CurlHandler());
+            } elseif (\function_exists('curl_exec')) {
+                $handler = new CurlHandler();
+            } elseif (\function_exists('curl_multi_exec')) {
+                $handler = new CurlMultiHandler();
             }
+        }
+
+        if (\ini_get('allow_url_fopen')) {
+            $handler = $handler
+                ? Proxy::wrapStreaming($handler, new StreamHandler())
+                : new StreamHandler();
+        } elseif (!$handler) {
+            throw new \RuntimeException('GuzzleHttp requires cURL, the allow_url_fopen ini setting, or a custom HTTP handler.');
+        }
+
+        return $handler;
+    }
+
+    /**
+     * Get the default User-Agent string to use with Guzzle.
+     */
+    public static function defaultUserAgent(): string
+    {
+        return sprintf('GuzzleHttp/%d', ClientInterface::MAJOR_VERSION);
+    }
+
+    /**
+     * Returns the default cacert bundle for the current system.
+     *
+     * First, the openssl.cafile and curl.cainfo php.ini settings are checked.
+     * If those settings are not configured, then the common locations for
+     * bundles found on Red Hat, CentOS, Fedora, Ubuntu, Debian, FreeBSD, OS X
+     * and Windows are checked. If any of these file locations are found on
+     * disk, they will be utilized.
+     *
+     * Note: the result of this function is cached for subsequent calls.
+     *
+     * @throws \RuntimeException if no bundle can be found.
+     *
+     * @deprecated Utils::defaultCaBundle will be removed in guzzlehttp/guzzle:8.0. This method is not needed in PHP 5.6+.
+     */
+    public static function defaultCaBundle(): string
+    {
+        static $cached = null;
+        static $cafiles = [
+            // Red Hat, CentOS, Fedora (provided by the ca-certificates package)
+            '/etc/pki/tls/certs/ca-bundle.crt',
+            // Ubuntu, Debian (provided by the ca-certificates package)
+            '/etc/ssl/certs/ca-certificates.crt',
+            // FreeBSD (provided by the ca_root_nss package)
+            '/usr/local/share/certs/ca-root-nss.crt',
+            // SLES 12 (provided by the ca-certificates package)
+            '/var/lib/ca-certificates/ca-bundle.pem',
+            // OS X provided by homebrew (using the default path)
+            '/usr/local/etc/openssl/cert.pem',
+            // Google app engine
+            '/etc/ca-certificates.crt',
+            // Windows?
+            'C:\\windows\\system32\\curl-ca-bundle.crt',
+            'C:\\windows\\curl-ca-bundle.crt',
+        ];
+
+        if ($cached) {
+            return $cached;
+        }
+
+        if ($ca = \ini_get('openssl.cafile')) {
+            return $cached = $ca;
+        }
+
+        if ($ca = \ini_get('curl.cainfo')) {
+            return $cached = $ca;
+        }
+
+        foreach ($cafiles as $filename) {
+            if (\file_exists($filename)) {
+                return $cached = $filename;
+            }
+        }
+
+        throw new \RuntimeException(
+            <<< EOT
+No system CA bundle could be found in any of the the common system locations.
+PHP versions earlier than 5.6 are not properly configured to use the system's
+CA bundle by default. In order to verify peer certificates, you will need to
+supply the path on disk to a certificate bundle to the 'verify' request
+option: http://docs.guzzlephp.org/en/latest/clients.html#verify. If you do not
+need a specific certificate bundle, then Mozilla provides a commonly used CA
+bundle which can be downloaded here (provided by the maintainer of cURL):
+https://curl.haxx.se/ca/cacert.pem. Once
+you have a CA bundle available on disk, you can set the 'openssl.cafile' PHP
+ini setting to point to the path to the file, allowing you to omit the 'verify'
+request option. See https://curl.haxx.se/docs/sslcerts.html for more
+information.
+EOT
+        );
+    }
+
+    /**
+     * Creates an associative array of lowercase header names to the actual
+     * header casing.
+     */
+    public static function normalizeHeaderKeys(array $headers): array
+    {
+        $result = [];
+        foreach (\array_keys($headers) as $key) {
+            $result[\strtolower($key)] = $key;
         }
 
         return $result;
     }
 
     /**
-     * Copy the contents of a stream into another stream until the given number
-     * of bytes have been read.
+     * Returns true if the provided host matches any of the no proxy areas.
      *
-     * @param StreamInterface $source Stream to read from
-     * @param StreamInterface $dest   Stream to write to
-     * @param int             $maxLen Maximum number of bytes to read. Pass -1
-     *                                to read the entire stream.
+     * This method will strip a port from the host if it is present. Each pattern
+     * can be matched with an exact match (e.g., "foo.com" == "foo.com") or a
+     * partial match: (e.g., "foo.com" == "baz.foo.com" and ".foo.com" ==
+     * "baz.foo.com", but ".foo.com" != "foo.com").
      *
-     * @throws \RuntimeException on error.
+     * Areas are matched in the following cases:
+     * 1. "*" (without quotes) always matches any hosts.
+     * 2. An exact match.
+     * 3. The area starts with "." and the area is the last part of the host. e.g.
+     *    '.mit.edu' will match any host that ends with '.mit.edu'.
+     *
+     * @param string   $host         Host to check against the patterns.
+     * @param string[] $noProxyArray An array of host patterns.
+     *
+     * @throws InvalidArgumentException
      */
-    public static function copyToStream(StreamInterface $source, StreamInterface $dest, int $maxLen = -1): void
+    public static function isHostInNoProxy(string $host, array $noProxyArray): bool
     {
-        $bufferSize = 8192;
+        if (\strlen($host) === 0) {
+            throw new InvalidArgumentException('Empty host provided');
+        }
 
-        if ($maxLen === -1) {
-            while (!$source->eof()) {
-                if (!$dest->write($source->read($bufferSize))) {
-                    break;
-                }
+        // Strip port if present.
+        [$host] = \explode(':', $host, 2);
+
+        foreach ($noProxyArray as $area) {
+            // Always match on wildcards.
+            if ($area === '*') {
+                return true;
             }
-        } else {
-            $remaining = $maxLen;
-            while ($remaining > 0 && !$source->eof()) {
-                $buf = $source->read(min($bufferSize, $remaining));
-                $len = strlen($buf);
-                if (!$len) {
-                    break;
-                }
-                $remaining -= $len;
-                $dest->write($buf);
+
+            if (empty($area)) {
+                // Don't match on empty values.
+                continue;
+            }
+
+            if ($area === $host) {
+                // Exact matches.
+                return true;
+            }
+            // Special match if the area when prefixed with ".". Remove any
+            // existing leading "." and add a new leading ".".
+            $area = '.'.\ltrim($area, '.');
+            if (\substr($host, -\strlen($area)) === $area) {
+                return true;
             }
         }
+
+        return false;
     }
 
     /**
-     * Copy the contents of a stream into a string until the given number of
-     * bytes have been read.
+     * Wrapper for json_decode that throws when an error occurs.
      *
-     * @param StreamInterface $stream Stream to read
-     * @param int             $maxLen Maximum number of bytes to read. Pass -1
-     *                                to read the entire stream.
+     * @param string $json    JSON data to parse
+     * @param bool   $assoc   When true, returned objects will be converted
+     *                        into associative arrays.
+     * @param int    $depth   User specified recursion depth.
+     * @param int    $options Bitmask of JSON decode options.
      *
-     * @throws \RuntimeException on error.
+     * @return object|array|string|int|float|bool|null
+     *
+     * @throws InvalidArgumentException if the JSON cannot be decoded.
+     *
+     * @see https://www.php.net/manual/en/function.json-decode.php
      */
-    public static function copyToString(StreamInterface $stream, int $maxLen = -1): string
+    public static function jsonDecode(string $json, bool $assoc = false, int $depth = 512, int $options = 0)
     {
-        $buffer = '';
-
-        if ($maxLen === -1) {
-            while (!$stream->eof()) {
-                $buf = $stream->read(1048576);
-                if ($buf === '') {
-                    break;
-                }
-                $buffer .= $buf;
-            }
-
-            return $buffer;
+        $data = \json_decode($json, $assoc, $depth, $options);
+        if (\JSON_ERROR_NONE !== \json_last_error()) {
+            throw new InvalidArgumentException('json_decode error: '.\json_last_error_msg());
         }
 
-        $len = 0;
-        while (!$stream->eof() && $len < $maxLen) {
-            $buf = $stream->read($maxLen - $len);
-            if ($buf === '') {
-                break;
-            }
-            $buffer .= $buf;
-            $len = strlen($buffer);
-        }
-
-        return $buffer;
+        return $data;
     }
 
     /**
-     * Calculate a hash of a stream.
+     * Wrapper for JSON encoding that throws when an error occurs.
      *
-     * This method reads the entire stream to calculate a rolling hash, based
-     * on PHP's `hash_init` functions.
+     * @param mixed $value   The value being encoded
+     * @param int   $options JSON encode option bitmask
+     * @param int   $depth   Set the maximum depth. Must be greater than zero.
      *
-     * @param StreamInterface $stream    Stream to calculate the hash for
-     * @param string          $algo      Hash algorithm (e.g. md5, crc32, etc)
-     * @param bool            $rawOutput Whether or not to use raw output
+     * @throws InvalidArgumentException if the JSON cannot be encoded.
      *
-     * @throws \RuntimeException on error.
+     * @see https://www.php.net/manual/en/function.json-encode.php
      */
-    public static function hash(StreamInterface $stream, string $algo, bool $rawOutput = false): string
+    public static function jsonEncode($value, int $options = 0, int $depth = 512): string
     {
-        $pos = $stream->tell();
-
-        if ($pos > 0) {
-            $stream->rewind();
+        $json = \json_encode($value, $options, $depth);
+        if (\JSON_ERROR_NONE !== \json_last_error()) {
+            throw new InvalidArgumentException('json_encode error: '.\json_last_error_msg());
         }
 
-        $ctx = hash_init($algo);
-        while (!$stream->eof()) {
-            hash_update($ctx, $stream->read(1048576));
-        }
-
-        $out = hash_final($ctx, $rawOutput);
-        $stream->seek($pos);
-
-        return $out;
+        /** @var string */
+        return $json;
     }
 
     /**
-     * Clone and modify a request with the given changes.
+     * Wrapper for the hrtime() or microtime() functions
+     * (depending on the PHP version, one of the two is used)
      *
-     * This method is useful for reducing the number of clones needed to mutate
-     * a message.
+     * @return float UNIX timestamp
      *
-     * The changes can be one of:
-     * - method: (string) Changes the HTTP method.
-     * - set_headers: (array) Sets the given headers.
-     * - remove_headers: (array) Remove the given headers.
-     * - body: (mixed) Sets the given body.
-     * - uri: (UriInterface) Set the URI.
-     * - query: (string) Set the query string value of the URI.
-     * - version: (string) Set the protocol version.
-     *
-     * @param RequestInterface $request Request to clone and modify.
-     * @param array            $changes Changes to apply.
+     * @internal
      */
-    public static function modifyRequest(RequestInterface $request, array $changes): RequestInterface
+    public static function currentTime(): float
     {
-        if (!$changes) {
-            return $request;
-        }
+        return (float) \function_exists('hrtime') ? \hrtime(true) / 1e9 : \microtime(true);
+    }
 
-        $headers = $request->getHeaders();
+    /**
+     * @throws InvalidArgumentException
+     *
+     * @internal
+     */
+    public static function idnUriConvert(UriInterface $uri, int $options = 0): UriInterface
+    {
+        if ($uri->getHost()) {
+            $asciiHost = self::idnToAsci($uri->getHost(), $options, $info);
+            if ($asciiHost === false) {
+                $errorBitSet = $info['errors'] ?? 0;
 
-        if (!isset($changes['uri'])) {
-            $uri = $request->getUri();
-        } else {
-            // Remove the host header if one is on the URI
-            if ($host = $changes['uri']->getHost()) {
-                $changes['set_headers']['Host'] = $host;
+                $errorConstants = array_filter(array_keys(get_defined_constants()), static function (string $name): bool {
+                    return substr($name, 0, 11) === 'IDNA_ERROR_';
+                });
 
-                if ($port = $changes['uri']->getPort()) {
-                    $standardPorts = ['http' => 80, 'https' => 443];
-                    $scheme = $changes['uri']->getScheme();
-                    if (isset($standardPorts[$scheme]) && $port != $standardPorts[$scheme]) {
-                        $changes['set_headers']['Host'] .= ':'.$port;
+                $errors = [];
+                foreach ($errorConstants as $errorConstant) {
+                    if ($errorBitSet & constant($errorConstant)) {
+                        $errors[] = $errorConstant;
                     }
                 }
-            }
-            $uri = $changes['uri'];
-        }
 
-        if (!empty($changes['remove_headers'])) {
-            $headers = self::caselessRemove($changes['remove_headers'], $headers);
-        }
-
-        if (!empty($changes['set_headers'])) {
-            $headers = self::caselessRemove(array_keys($changes['set_headers']), $headers);
-            $headers = $changes['set_headers'] + $headers;
-        }
-
-        if (isset($changes['query'])) {
-            $uri = $uri->withQuery($changes['query']);
-        }
-
-        if ($request instanceof ServerRequestInterface) {
-            $new = (new ServerRequest(
-                $changes['method'] ?? $request->getMethod(),
-                $uri,
-                $headers,
-                $changes['body'] ?? $request->getBody(),
-                $changes['version'] ?? $request->getProtocolVersion(),
-                $request->getServerParams()
-            ))
-            ->withParsedBody($request->getParsedBody())
-            ->withQueryParams($request->getQueryParams())
-            ->withCookieParams($request->getCookieParams())
-            ->withUploadedFiles($request->getUploadedFiles());
-
-            foreach ($request->getAttributes() as $key => $value) {
-                $new = $new->withAttribute($key, $value);
-            }
-
-            return $new;
-        }
-
-        return new Request(
-            $changes['method'] ?? $request->getMethod(),
-            $uri,
-            $headers,
-            $changes['body'] ?? $request->getBody(),
-            $changes['version'] ?? $request->getProtocolVersion()
-        );
-    }
-
-    /**
-     * Read a line from the stream up to the maximum allowed buffer length.
-     *
-     * @param StreamInterface $stream    Stream to read from
-     * @param int|null        $maxLength Maximum buffer length
-     */
-    public static function readLine(StreamInterface $stream, int $maxLength = null): string
-    {
-        $buffer = '';
-        $size = 0;
-
-        while (!$stream->eof()) {
-            if ('' === ($byte = $stream->read(1))) {
-                return $buffer;
-            }
-            $buffer .= $byte;
-            // Break when a new line is found or the max length - 1 is reached
-            if ($byte === "\n" || ++$size === $maxLength - 1) {
-                break;
-            }
-        }
-
-        return $buffer;
-    }
-
-    /**
-     * Create a new stream based on the input type.
-     *
-     * Options is an associative array that can contain the following keys:
-     * - metadata: Array of custom metadata.
-     * - size: Size of the stream.
-     *
-     * This method accepts the following `$resource` types:
-     * - `Psr\Http\Message\StreamInterface`: Returns the value as-is.
-     * - `string`: Creates a stream object that uses the given string as the contents.
-     * - `resource`: Creates a stream object that wraps the given PHP stream resource.
-     * - `Iterator`: If the provided value implements `Iterator`, then a read-only
-     *   stream object will be created that wraps the given iterable. Each time the
-     *   stream is read from, data from the iterator will fill a buffer and will be
-     *   continuously called until the buffer is equal to the requested read size.
-     *   Subsequent read calls will first read from the buffer and then call `next`
-     *   on the underlying iterator until it is exhausted.
-     * - `object` with `__toString()`: If the object has the `__toString()` method,
-     *   the object will be cast to a string and then a stream will be returned that
-     *   uses the string value.
-     * - `NULL`: When `null` is passed, an empty stream object is returned.
-     * - `callable` When a callable is passed, a read-only stream object will be
-     *   created that invokes the given callable. The callable is invoked with the
-     *   number of suggested bytes to read. The callable can return any number of
-     *   bytes, but MUST return `false` when there is no more data to return. The
-     *   stream object that wraps the callable will invoke the callable until the
-     *   number of requested bytes are available. Any additional bytes will be
-     *   buffered and used in subsequent reads.
-     *
-     * @param resource|string|int|float|bool|StreamInterface|callable|\Iterator|null $resource Entity body data
-     * @param array{size?: int, metadata?: array}                                    $options  Additional options
-     *
-     * @throws \InvalidArgumentException if the $resource arg is not valid.
-     */
-    public static function streamFor($resource = '', array $options = []): StreamInterface
-    {
-        if (is_scalar($resource)) {
-            $stream = self::tryFopen('php://temp', 'r+');
-            if ($resource !== '') {
-                fwrite($stream, (string) $resource);
-                fseek($stream, 0);
-            }
-
-            return new Stream($stream, $options);
-        }
-
-        switch (gettype($resource)) {
-            case 'resource':
-                /*
-                 * The 'php://input' is a special stream with quirks and inconsistencies.
-                 * We avoid using that stream by reading it into php://temp
-                 */
-
-                /** @var resource $resource */
-                if ((\stream_get_meta_data($resource)['uri'] ?? '') === 'php://input') {
-                    $stream = self::tryFopen('php://temp', 'w+');
-                    stream_copy_to_stream($resource, $stream);
-                    fseek($stream, 0);
-                    $resource = $stream;
+                $errorMessage = 'IDN conversion failed';
+                if ($errors) {
+                    $errorMessage .= ' (errors: '.implode(', ', $errors).')';
                 }
 
-                return new Stream($resource, $options);
-            case 'object':
-                /** @var object $resource */
-                if ($resource instanceof StreamInterface) {
-                    return $resource;
-                } elseif ($resource instanceof \Iterator) {
-                    return new PumpStream(function () use ($resource) {
-                        if (!$resource->valid()) {
-                            return false;
-                        }
-                        $result = $resource->current();
-                        $resource->next();
-
-                        return $result;
-                    }, $options);
-                } elseif (method_exists($resource, '__toString')) {
-                    return self::streamFor((string) $resource, $options);
-                }
-                break;
-            case 'NULL':
-                return new Stream(self::tryFopen('php://temp', 'r+'), $options);
-        }
-
-        if (is_callable($resource)) {
-            return new PumpStream($resource, $options);
-        }
-
-        throw new \InvalidArgumentException('Invalid resource type: '.gettype($resource));
-    }
-
-    /**
-     * Safely opens a PHP stream resource using a filename.
-     *
-     * When fopen fails, PHP normally raises a warning. This function adds an
-     * error handler that checks for errors and throws an exception instead.
-     *
-     * @param string $filename File to open
-     * @param string $mode     Mode used to open the file
-     *
-     * @return resource
-     *
-     * @throws \RuntimeException if the file cannot be opened
-     */
-    public static function tryFopen(string $filename, string $mode)
-    {
-        $ex = null;
-        set_error_handler(static function (int $errno, string $errstr) use ($filename, $mode, &$ex): bool {
-            $ex = new \RuntimeException(sprintf(
-                'Unable to open "%s" using mode "%s": %s',
-                $filename,
-                $mode,
-                $errstr
-            ));
-
-            return true;
-        });
-
-        try {
-            /** @var resource $handle */
-            $handle = fopen($filename, $mode);
-        } catch (\Throwable $e) {
-            $ex = new \RuntimeException(sprintf(
-                'Unable to open "%s" using mode "%s": %s',
-                $filename,
-                $mode,
-                $e->getMessage()
-            ), 0, $e);
-        }
-
-        restore_error_handler();
-
-        if ($ex) {
-            /** @var $ex \RuntimeException */
-            throw $ex;
-        }
-
-        return $handle;
-    }
-
-    /**
-     * Safely gets the contents of a given stream.
-     *
-     * When stream_get_contents fails, PHP normally raises a warning. This
-     * function adds an error handler that checks for errors and throws an
-     * exception instead.
-     *
-     * @param resource $stream
-     *
-     * @throws \RuntimeException if the stream cannot be read
-     */
-    public static function tryGetContents($stream): string
-    {
-        $ex = null;
-        set_error_handler(static function (int $errno, string $errstr) use (&$ex): bool {
-            $ex = new \RuntimeException(sprintf(
-                'Unable to read stream contents: %s',
-                $errstr
-            ));
-
-            return true;
-        });
-
-        try {
-            /** @var string|false $contents */
-            $contents = stream_get_contents($stream);
-
-            if ($contents === false) {
-                $ex = new \RuntimeException('Unable to read stream contents');
+                throw new InvalidArgumentException($errorMessage);
             }
-        } catch (\Throwable $e) {
-            $ex = new \RuntimeException(sprintf(
-                'Unable to read stream contents: %s',
-                $e->getMessage()
-            ), 0, $e);
+            if ($uri->getHost() !== $asciiHost) {
+                // Replace URI only if the ASCII version is different
+                $uri = $uri->withHost($asciiHost);
+            }
         }
 
-        restore_error_handler();
-
-        if ($ex) {
-            /** @var $ex \RuntimeException */
-            throw $ex;
-        }
-
-        return $contents;
+        return $uri;
     }
 
     /**
-     * Returns a UriInterface for the given value.
-     *
-     * This function accepts a string or UriInterface and returns a
-     * UriInterface for the given value. If the value is already a
-     * UriInterface, it is returned as-is.
-     *
-     * @param string|UriInterface $uri
-     *
-     * @throws \InvalidArgumentException
+     * @internal
      */
-    public static function uriFor($uri): UriInterface
+    public static function getenv(string $name): ?string
     {
-        if ($uri instanceof UriInterface) {
-            return $uri;
+        if (isset($_SERVER[$name])) {
+            return (string) $_SERVER[$name];
         }
 
-        if (is_string($uri)) {
-            return new Uri($uri);
+        if (\PHP_SAPI === 'cli' && ($value = \getenv($name)) !== false && $value !== null) {
+            return (string) $value;
         }
 
-        throw new \InvalidArgumentException('URI must be a string or UriInterface');
+        return null;
+    }
+
+    /**
+     * @return string|false
+     */
+    private static function idnToAsci(string $domain, int $options, ?array &$info = [])
+    {
+        if (\function_exists('idn_to_ascii') && \defined('INTL_IDNA_VARIANT_UTS46')) {
+            return \idn_to_ascii($domain, $options, \INTL_IDNA_VARIANT_UTS46, $info);
+        }
+
+        throw new \Error('ext-idn or symfony/polyfill-intl-idn not loaded or too old');
     }
 }
