@@ -1,32 +1,23 @@
 <?php
 
-namespace App\Providers;
+namespace Illuminate\Events;
 
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
-use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Event;
+use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
+use Illuminate\Support\ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
 {
     /**
-     * The event listener mappings for the application.
-     *
-     * @var array<class-string, array<int, class-string>>
-     */
-    protected $listen = [
-        Registered::class => [
-            SendEmailVerificationNotification::class,
-        ],
-    ];
-
-    /**
-     * Register any events for your application.
+     * Register the service provider.
      *
      * @return void
      */
-    public function boot()
+    public function register()
     {
-        //
+        $this->app->singleton('events', function ($app) {
+            return (new Dispatcher($app))->setQueueResolver(function () use ($app) {
+                return $app->make(QueueFactoryContract::class);
+            });
+        });
     }
 }

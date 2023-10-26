@@ -1,69 +1,47 @@
 <?php
 
-namespace Faker;
+namespace Illuminate\Contracts\Cookie;
 
-class Factory
+interface Factory
 {
-    public const DEFAULT_LOCALE = 'en_US';
-
-    protected static $defaultProviders = ['Address', 'Barcode', 'Biased', 'Color', 'Company', 'DateTime', 'File', 'HtmlLorem', 'Image', 'Internet', 'Lorem', 'Medical', 'Miscellaneous', 'Payment', 'Person', 'PhoneNumber', 'Text', 'UserAgent', 'Uuid'];
+    /**
+     * Create a new cookie instance.
+     *
+     * @param  string  $name
+     * @param  string  $value
+     * @param  int  $minutes
+     * @param  string|null  $path
+     * @param  string|null  $domain
+     * @param  bool|null  $secure
+     * @param  bool  $httpOnly
+     * @param  bool  $raw
+     * @param  string|null  $sameSite
+     * @return \Symfony\Component\HttpFoundation\Cookie
+     */
+    public function make($name, $value, $minutes = 0, $path = null, $domain = null, $secure = null, $httpOnly = true, $raw = false, $sameSite = null);
 
     /**
-     * Create a new generator
+     * Create a cookie that lasts "forever" (five years).
      *
-     * @param string $locale
-     *
-     * @return Generator
+     * @param  string  $name
+     * @param  string  $value
+     * @param  string|null  $path
+     * @param  string|null  $domain
+     * @param  bool|null  $secure
+     * @param  bool  $httpOnly
+     * @param  bool  $raw
+     * @param  string|null  $sameSite
+     * @return \Symfony\Component\HttpFoundation\Cookie
      */
-    public static function create($locale = self::DEFAULT_LOCALE)
-    {
-        $generator = new Generator();
-
-        foreach (static::$defaultProviders as $provider) {
-            $providerClassName = self::getProviderClassname($provider, $locale);
-            $generator->addProvider(new $providerClassName($generator));
-        }
-
-        return $generator;
-    }
+    public function forever($name, $value, $path = null, $domain = null, $secure = null, $httpOnly = true, $raw = false, $sameSite = null);
 
     /**
-     * @param string $provider
-     * @param string $locale
+     * Expire the given cookie.
      *
-     * @return string
+     * @param  string  $name
+     * @param  string|null  $path
+     * @param  string|null  $domain
+     * @return \Symfony\Component\HttpFoundation\Cookie
      */
-    protected static function getProviderClassname($provider, $locale = '')
-    {
-        if ($providerClass = self::findProviderClassname($provider, $locale)) {
-            return $providerClass;
-        }
-        // fallback to default locale
-        if ($providerClass = self::findProviderClassname($provider, static::DEFAULT_LOCALE)) {
-            return $providerClass;
-        }
-        // fallback to no locale
-        if ($providerClass = self::findProviderClassname($provider)) {
-            return $providerClass;
-        }
-
-        throw new \InvalidArgumentException(sprintf('Unable to find provider "%s" with locale "%s"', $provider, $locale));
-    }
-
-    /**
-     * @param string $provider
-     * @param string $locale
-     *
-     * @return string|null
-     */
-    protected static function findProviderClassname($provider, $locale = '')
-    {
-        $providerClass = 'Faker\\' . ($locale ? sprintf('Provider\%s\%s', $locale, $provider) : sprintf('Provider\%s', $provider));
-
-        if (class_exists($providerClass, true)) {
-            return $providerClass;
-        }
-
-        return null;
-    }
+    public function forget($name, $path = null, $domain = null);
 }
