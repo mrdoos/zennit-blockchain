@@ -1,94 +1,488 @@
-![Guzzle](.github/logo.png?raw=true)
+This is the PHP port of Hamcrest Matchers
+=========================================
 
-# Guzzle, PHP HTTP client
+[![Build Status](https://travis-ci.org/hamcrest/hamcrest-php.png?branch=master)](https://travis-ci.org/hamcrest/hamcrest-php)
 
-[![Latest Version](https://img.shields.io/github/release/guzzle/guzzle.svg?style=flat-square)](https://github.com/guzzle/guzzle/releases)
-[![Build Status](https://img.shields.io/github/workflow/status/guzzle/guzzle/CI?label=ci%20build&style=flat-square)](https://github.com/guzzle/guzzle/actions?query=workflow%3ACI)
-[![Total Downloads](https://img.shields.io/packagist/dt/guzzlehttp/guzzle.svg?style=flat-square)](https://packagist.org/packages/guzzlehttp/guzzle)
+Hamcrest is a matching library originally written for Java, but
+subsequently ported to many other languages.  hamcrest-php is the
+official PHP port of Hamcrest and essentially follows a literal
+translation of the original Java API for Hamcrest, with a few
+Exceptions, mostly down to PHP language barriers:
 
-Guzzle is a PHP HTTP client that makes it easy to send HTTP requests and
-trivial to integrate with web services.
+  1. `instanceOf($theClass)` is actually `anInstanceOf($theClass)`
 
-- Simple interface for building query strings, POST requests, streaming large
-  uploads, streaming large downloads, using HTTP cookies, uploading JSON data,
-  etc...
-- Can send both synchronous and asynchronous requests using the same interface.
-- Uses PSR-7 interfaces for requests, responses, and streams. This allows you
-  to utilize other PSR-7 compatible libraries with Guzzle.
-- Supports PSR-18 allowing interoperability between other PSR-18 HTTP Clients.
-- Abstracts away the underlying HTTP transport, allowing you to write
-  environment and transport agnostic code; i.e., no hard dependency on cURL,
-  PHP streams, sockets, or non-blocking event loops.
-- Middleware system allows you to augment and compose client behavior.
+  2. `both(containsString('a'))->and(containsString('b'))`
+     is actually `both(containsString('a'))->andAlso(containsString('b'))`
+
+  3. `either(containsString('a'))->or(containsString('b'))`
+     is actually `either(containsString('a'))->orElse(containsString('b'))`
+
+  4. Unless it would be non-semantic for a matcher to do so, hamcrest-php
+     allows dynamic typing for it's input, in "the PHP way". Exception are
+     where semantics surrounding the type itself would suggest otherwise,
+     such as stringContains() and greaterThan().
+
+  5. Several official matchers have not been ported because they don't
+     make sense or don't apply in PHP:
+
+       - `typeCompatibleWith($theClass)`
+       - `eventFrom($source)`
+       - `hasProperty($name)` **
+       - `samePropertyValuesAs($obj)` **
+
+  6. When most of the collections matchers are finally ported, PHP-specific
+     aliases will probably be created due to a difference in naming
+     conventions between Java's Arrays, Collections, Sets and Maps compared
+     with PHP's Arrays.
+
+---
+** [Unless we consider POPO's (Plain Old PHP Objects) akin to JavaBeans]
+     - The POPO thing is a joke.  Java devs coin the term POJO's (Plain Old
+       Java Objects).
+
+
+Usage
+-----
+
+Hamcrest matchers are easy to use as:
 
 ```php
-$client = new \GuzzleHttp\Client();
-$response = $client->request('GET', 'https://api.github.com/repos/guzzle/guzzle');
-
-echo $response->getStatusCode(); // 200
-echo $response->getHeaderLine('content-type'); // 'application/json; charset=utf8'
-echo $response->getBody(); // '{"id": 1420053, "name": "guzzle", ...}'
-
-// Send an asynchronous request.
-$request = new \GuzzleHttp\Psr7\Request('GET', 'http://httpbin.org');
-$promise = $client->sendAsync($request)->then(function ($response) {
-    echo 'I completed! ' . $response->getBody();
-});
-
-$promise->wait();
+Hamcrest_MatcherAssert::assertThat('a', Hamcrest_Matchers::equalToIgnoringCase('A'));
 ```
 
-## Help and docs
+Alternatively, you can use the global proxy-functions:
 
-We use GitHub issues only to discuss bugs and new features. For support please refer to:
+```php
+$result = true;
+// with an identifier
+assertThat("result should be true", $result, equalTo(true));
 
-- [Documentation](https://docs.guzzlephp.org)
-- [Stack Overflow](https://stackoverflow.com/questions/tagged/guzzle)
-- [#guzzle](https://app.slack.com/client/T0D2S9JCT/CE6UAAKL4) channel on [PHP-HTTP Slack](https://slack.httplug.io/)
-- [Gitter](https://gitter.im/guzzle/guzzle)
+// without an identifier
+assertThat($result, equalTo(true));
 
+// evaluate a boolean expression
+assertThat($result === true);
 
-## Installing Guzzle
-
-The recommended way to install Guzzle is through
-[Composer](https://getcomposer.org/).
-
-```bash
-composer require guzzlehttp/guzzle
+// with syntactic sugar is()
+assertThat(true, is(true));
 ```
 
+:warning: **NOTE:** the global proxy-functions aren't autoloaded by default, so you will need to load them first:
 
-## Version Guidance
+```php
+\Hamcrest\Util::registerGlobalFunctions();
+```
 
-| Version | Status              | Packagist           | Namespace    | Repo                | Docs                | PSR-7 | PHP Version  |
-|---------|---------------------|---------------------|--------------|---------------------|---------------------|-------|--------------|
-| 3.x     | EOL                 | `guzzle/guzzle`     | `Guzzle`     | [v3][guzzle-3-repo] | [v3][guzzle-3-docs] | No    | >=5.3.3,<7.0 |
-| 4.x     | EOL                 | `guzzlehttp/guzzle` | `GuzzleHttp` | [v4][guzzle-4-repo] | N/A                 | No    | >=5.4,<7.0   |
-| 5.x     | EOL                 | `guzzlehttp/guzzle` | `GuzzleHttp` | [v5][guzzle-5-repo] | [v5][guzzle-5-docs] | No    | >=5.4,<7.4   |
-| 6.x     | Security fixes only | `guzzlehttp/guzzle` | `GuzzleHttp` | [v6][guzzle-6-repo] | [v6][guzzle-6-docs] | Yes   | >=5.5,<8.0   |
-| 7.x     | Latest              | `guzzlehttp/guzzle` | `GuzzleHttp` | [v7][guzzle-7-repo] | [v7][guzzle-7-docs] | Yes   | >=7.2.5,<8.3 |
-
-[guzzle-3-repo]: https://github.com/guzzle/guzzle3
-[guzzle-4-repo]: https://github.com/guzzle/guzzle/tree/4.x
-[guzzle-5-repo]: https://github.com/guzzle/guzzle/tree/5.3
-[guzzle-6-repo]: https://github.com/guzzle/guzzle/tree/6.5
-[guzzle-7-repo]: https://github.com/guzzle/guzzle
-[guzzle-3-docs]: https://guzzle3.readthedocs.io/
-[guzzle-5-docs]: https://docs.guzzlephp.org/en/5.3/
-[guzzle-6-docs]: https://docs.guzzlephp.org/en/6.5/
-[guzzle-7-docs]: https://docs.guzzlephp.org/en/latest/
+For brevity, all of the examples below use the proxy-functions.
 
 
-## Security
+Documentation
+-------------
+A tutorial can be found on the [Hamcrest site](https://code.google.com/archive/p/hamcrest/wikis/TutorialPHP.wiki).
 
-If you discover a security vulnerability within this package, please send an email to security@tidelift.com. All security vulnerabilities will be promptly addressed. Please do not disclose security-related issues publicly until a fix has been announced. Please see [Security Policy](https://github.com/guzzle/guzzle/security/policy) for more information.
 
-## License
+Available Matchers
+------------------
+* [Array](../master/README.md#array)
+* [Collection](../master/README.md#collection)
+* [Object](../master/README.md#object)
+* [Numbers](../master/README.md#numbers)
+* [Type checking](../master/README.md#type-checking)
+* [XML](../master/README.md#xml)
 
-Guzzle is made available under the MIT License (MIT). Please see [License File](LICENSE) for more information.
 
-## For Enterprise
+### Array
 
-Available as part of the Tidelift Subscription
+* `anArray` - evaluates an array
+```php
+assertThat([], anArray());
+```
 
-The maintainers of Guzzle and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open source dependencies you use to build your applications. Save time, reduce risk, and improve code health, while paying the maintainers of the exact dependencies you use. [Learn more.](https://tidelift.com/subscription/pkg/packagist-guzzlehttp-guzzle?utm_source=packagist-guzzlehttp-guzzle&utm_medium=referral&utm_campaign=enterprise&utm_term=repo)
+* `hasItemInArray` - check if item exists in array
+```php
+$list = range(2, 7, 2);
+$item = 4;
+assertThat($list, hasItemInArray($item));
+```
+
+* `hasValue` - alias of hasItemInArray
+
+* `arrayContainingInAnyOrder` - check if array contains elements in any order
+```php
+assertThat([2, 4, 6], arrayContainingInAnyOrder([6, 4, 2]));
+assertThat([2, 4, 6], arrayContainingInAnyOrder([4, 2, 6]));
+```
+
+* `containsInAnyOrder` - alias of arrayContainingInAnyOrder
+
+* `arrayContaining` - An array with elements that match the given matchers in the same order.
+```php
+assertThat([2, 4, 6], arrayContaining([2, 4, 6]));
+assertthat([2, 4, 6], not(arrayContaining([6, 4, 2])));
+```
+
+* `contains` - check array in same order
+```php
+assertThat([2, 4, 6], contains([2, 4, 6]));
+```
+
+* `hasKeyInArray` - check if array has given key
+```php
+assertThat(['name'=> 'foobar'], hasKeyInArray('name'));
+```
+
+* `hasKey` - alias of hasKeyInArray
+
+* `hasKeyValuePair` - check if arary has given key, value pair
+```php
+assertThat(['name'=> 'foobar'], hasKeyValuePair('name', 'foobar'));
+```
+* `hasEntry` - same as hasKeyValuePair
+
+* `arrayWithSize` - check array has given size
+```php
+assertthat([2, 4, 6], arrayWithSize(3));
+```
+* `emptyArray` - check if array is emtpy
+```php
+assertThat([], emptyArray());
+```
+
+* `nonEmptyArray`
+```php
+assertThat([1], nonEmptyArray());
+```
+
+### Collection
+
+* `emptyTraversable` - check if traversable is empty
+```php
+$empty_it = new EmptyIterator;
+assertThat($empty_it, emptyTraversable());
+```
+
+* `nonEmptyTraversable` - check if traversable isn't empty
+```php
+$non_empty_it = new ArrayIterator(range(1, 10));
+assertThat($non_empty_it, nonEmptyTraversable());
+a
+```
+
+* `traversableWithSize`
+```php
+$non_empty_it = new ArrayIterator(range(1, 10));
+assertThat($non_empty_it, traversableWithSize(count(range(1, 10))));
+`
+```
+
+### Core
+
+* `allOf` - Evaluates to true only if ALL of the passed in matchers evaluate to true.
+```php
+assertThat([2,4,6], allOf(hasValue(2), arrayWithSize(3)));
+```
+
+* `anyOf` - Evaluates to true if ANY of the passed in matchers evaluate to true.
+```php
+assertThat([2, 4, 6], anyOf(hasValue(8), hasValue(2)));
+```
+
+* `noneOf` - Evaluates to false if ANY of the passed in matchers evaluate to true.
+```php
+assertThat([2, 4, 6], noneOf(hasValue(1), hasValue(3)));
+```
+
+* `both` + `andAlso` - This is useful for fluently combining matchers that must both pass.
+```php
+assertThat([2, 4, 6], both(hasValue(2))->andAlso(hasValue(4)));
+```
+
+* `either` + `orElse` - This is useful for fluently combining matchers where either may pass,
+```php
+assertThat([2, 4, 6], either(hasValue(2))->orElse(hasValue(4)));
+```
+
+* `describedAs` - Wraps an existing matcher and overrides the description when it fails.
+```php 
+$expected = "Dog";
+$found = null;
+// this assertion would result error message as Expected: is not null but: was null
+//assertThat("Expected {$expected}, got {$found}", $found, is(notNullValue()));
+// and this assertion would result error message as Expected: Dog but: was null
+//assertThat($found, describedAs($expected, notNullValue()));
+```
+
+* `everyItem` - A matcher to apply to every element in an array.
+```php
+assertThat([2, 4, 6], everyItem(notNullValue()));
+```
+
+* `hasItem` - check array has given item, it can take a matcher argument
+```php
+assertThat([2, 4, 6], hasItem(equalTo(2)));
+```
+
+* `hasItems` - check array has givem items, it can take multiple matcher as arguments
+```php
+assertThat([1, 3, 5], hasItems(equalTo(1), equalTo(3)));
+```
+
+### Object
+
+* `hasToString` - check `__toString` or `toString` method
+```php
+class Foo {
+    public $name = null;
+
+    public function __toString() {
+        return "[Foo]Instance";
+    }
+}
+$foo = new Foo;
+assertThat($foo, hasToString(equalTo("[Foo]Instance")));
+```
+
+* `equalTo` - compares two instances using comparison operator '=='
+```php
+$foo = new Foo;
+$foo2 = new Foo;
+assertThat($foo, equalTo($foo2));
+```
+
+* `identicalTo` - compares two instances using identity operator '==='
+```php
+assertThat($foo, is(not(identicalTo($foo2))));
+```
+
+* `anInstanceOf` - check instance is an instance|sub-class of given class
+```php
+assertThat($foo, anInstanceOf(Foo::class));
+```
+
+* `any` - alias of `anInstanceOf`
+
+* `nullValue` check null
+```php
+assertThat(null, is(nullValue()));
+```
+
+* `notNullValue` check not null
+```php
+assertThat("", notNullValue());
+```
+
+* `sameInstance` - check for same instance
+```php
+assertThat($foo, is(not(sameInstance($foo2))));
+assertThat($foo, is(sameInstance($foo)));
+```
+
+* `typeOf`- check type
+```php 
+assertThat(1, typeOf("integer"));
+```
+
+* `notSet` - check if instance property is not set
+```php
+assertThat($foo, notSet("name"));
+```
+
+* `set` - check if instance property is set
+```php
+$foo->name = "bar";
+assertThat($foo, set("name"));
+```
+
+### Numbers
+
+* `closeTo` - check value close to a range
+```php
+assertThat(3, closeTo(3, 0.5));
+```
+
+* `comparesEqualTo` - check with '=='
+```php
+assertThat(2, comparesEqualTo(2));
+```
+
+* `greaterThan` - check '>'
+```
+assertThat(2, greaterThan(1));
+```
+
+* `greaterThanOrEqualTo`
+```php
+assertThat(2, greaterThanOrEqualTo(2));
+```
+
+* `atLeast` - The value is >= given value
+```php
+assertThat(3, atLeast(2));
+```
+* `lessThan`
+```php
+assertThat(2, lessThan(3));
+```
+
+* `lessThanOrEqualTo`
+```php
+assertThat(2, lessThanOrEqualTo(3));
+```
+
+* `atMost` - The value is <= given value
+```php
+assertThat(2, atMost(3));
+```
+
+### String
+
+* `emptyString` - check for empty string
+```php
+assertThat("", emptyString());
+```
+
+* `isEmptyOrNullString`
+```php
+assertThat(null, isEmptyOrNullString());
+```
+
+* `nullOrEmptyString`
+```php
+assertThat("", nullOrEmptyString());
+```
+
+* `isNonEmptyString`
+```php
+assertThat("foo", isNonEmptyString());
+```
+
+* `nonEmptyString`
+```php
+assertThat("foo", nonEmptyString());
+```
+
+* `equalToIgnoringCase`
+```php
+assertThat("Foo", equalToIgnoringCase("foo"));
+```
+* `equalToIgnoringWhiteSpace`
+```php
+assertThat(" Foo ", equalToIgnoringWhiteSpace("Foo"));
+```
+
+* `matchesPattern` - matches with regex pattern
+```php
+assertThat("foobarbaz", matchesPattern('/(foo)(bar)(baz)/'));
+```
+
+* `containsString` - check for substring
+```php
+assertThat("foobar", containsString("foo"));
+```
+
+* `containsStringIgnoringCase`
+```php
+assertThat("fooBar", containsStringIgnoringCase("bar"));
+```
+
+* `stringContainsInOrder`
+```php
+assertThat("foo", stringContainsInOrder("foo"));
+```
+
+* `endsWith` - check string that ends with given value
+```php
+assertThat("foo", endsWith("oo"));
+```
+
+* `startsWith` - check string that starts with given value
+```php
+assertThat("bar", startsWith("ba"));
+```
+
+### Type-checking
+
+* `arrayValue` - check array type
+```php
+assertThat([], arrayValue());
+```
+
+* `booleanValue`
+```php
+assertThat(true, booleanValue());
+```
+* `boolValue` - alias of booleanValue
+
+* `callableValue` - check if value is callable
+```php
+$func = function () {};
+assertThat($func, callableValue());
+```
+* `doubleValue`
+```php
+assertThat(3.14, doubleValue());
+```
+
+* `floatValue`
+```php
+assertThat(3.14, floatValue());
+```
+
+* `integerValue`
+```php
+assertThat(1, integerValue());
+```
+
+* `intValue` - alias of `integerValue`
+
+* `numericValue` - check if value is numeric
+```php
+assertThat("123", numericValue());
+```
+
+* `objectValue` - check for object
+```php
+$obj = new stdClass;
+assertThat($obj, objectValue());
+```
+* `anObject`
+```php
+assertThat($obj, anObject());
+```
+
+* `resourceValue` - check resource type
+```php
+$fp = fopen("/tmp/foo", "w+");
+assertThat($fp, resourceValue());
+```
+
+* `scalarValue` - check for scaler value
+```php
+assertThat(1, scalarValue());
+```
+
+* `stringValue`
+```php
+assertThat("", stringValue());
+```
+
+### XML
+
+* `hasXPath` - check xml with a xpath
+```php
+$xml = <<<XML
+<books>
+  <book>
+    <isbn>1</isbn>   
+  </book>
+  <book>
+    <isbn>2</isbn>   
+  </book>
+</books>
+XML;
+
+$doc = new DOMDocument;
+$doc->loadXML($xml);
+assertThat($doc, hasXPath("book", 2));
+```
+
