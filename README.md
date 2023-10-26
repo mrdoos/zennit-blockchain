@@ -144,17 +144,13 @@ To get started with the Zennit Blockchain Project, follow these steps:
 
 ### Resources
 
-- **Official Website:** [Zennit.io](https://zennit.io)
-- **Blockchain Explorer:** [Explorer.Zennit.io](https://explorer.zennit.io)
-- **Community Forum:** [Community.Zennit.io](https://community.zennit.io)
+- **Official Website:**  (https://nscio.vercel.app/))
 
 ### Support and Community
 
 Join our community to stay updated, ask questions, and collaborate with fellow developers and enthusiasts:
 
-- **Discord:** [Zennit Discord Server](https://discord.gg/zennit)
-- **Twitter:** [@ZennitOfficial](https://twitter.com/ZennitOfficial)
-- **Reddit:** [r/Zennit](https://www.reddit.com/r/zennit)
+
 
 ### License
 
@@ -163,3 +159,5 @@ This project is licensed under the [MIT License](LICENSE.md) - see the [LICENSE.
 ---
 
 Thank you for being a part of the Zennit Blockchain Project! Happy coding and happy trading! 🚀🌟
+<img src="_95438bb6-f45b-4211-a355-6d8d88a882c6.jpeg" width="600" height="600">
+
