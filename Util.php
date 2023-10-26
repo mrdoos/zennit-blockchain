@@ -1,78 +1,73 @@
 <?php
 
-declare(strict_types=1);
+namespace Illuminate\Container;
 
-/*
- * This file is a part of dflydev/dot-access-data.
- *
- * (c) Dragonfly Development Inc.
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+use Closure;
+use ReflectionNamedType;
+
+/**
+ * @internal
  */
-
-namespace Dflydev\DotAccessData;
-
 class Util
 {
     /**
-     * Test if array is an associative array
+     * If the given value is not an array and not null, wrap it in one.
      *
-     * Note that this function will return true if an array is empty. Meaning
-     * empty arrays will be treated as if they are associative arrays.
+     * From Arr::wrap() in Illuminate\Support.
      *
-     * @param array<mixed> $arr
-     *
-     * @return bool
-     *
-     * @psalm-pure
+     * @param  mixed  $value
+     * @return array
      */
-    public static function isAssoc(array $arr): bool
+    public static function arrayWrap($value)
     {
-        return !count($arr) || count(array_filter(array_keys($arr), 'is_string')) == count($arr);
+        if (is_null($value)) {
+            return [];
+        }
+
+        return is_array($value) ? $value : [$value];
     }
 
     /**
-     * Merge contents from one associtative array to another
+     * Return the default value of the given value.
      *
-     * @param mixed $to
-     * @param mixed $from
-     * @param DataInterface::PRESERVE|DataInterface::REPLACE|DataInterface::MERGE $mode
+     * From global value() helper in Illuminate\Support.
      *
+     * @param  mixed  $value
      * @return mixed
-     *
-     * @psalm-pure
      */
-    public static function mergeAssocArray($to, $from, int $mode = DataInterface::REPLACE)
+    public static function unwrapIfClosure($value)
     {
-        if ($mode === DataInterface::MERGE && self::isList($to) && self::isList($from)) {
-            return array_merge($to, $from);
+        return $value instanceof Closure ? $value() : $value;
+    }
+
+    /**
+     * Get the class name of the given parameter's type, if possible.
+     *
+     * From Reflector::getParameterClassName() in Illuminate\Support.
+     *
+     * @param  \ReflectionParameter  $parameter
+     * @return string|null
+     */
+    public static function getParameterClassName($parameter)
+    {
+        $type = $parameter->getType();
+
+        if (! $type instanceof ReflectionNamedType || $type->isBuiltin()) {
+            return null;
         }
 
-        if (is_array($from) && is_array($to)) {
-            foreach ($from as $k => $v) {
-                if (!isset($to[$k])) {
-                    $to[$k] = $v;
-                } else {
-                    $to[$k] = self::mergeAssocArray($to[$k], $v, $mode);
-                }
+        $name = $type->getName();
+
+        if (! is_null($class = $parameter->getDeclaringClass())) {
+            if ($name === 'self') {
+                return $class->getName();
             }
 
-            return $to;
+            if ($name === 'parent' && $parent = $class->getParentClass()) {
+                return $parent->getName();
+            }
         }
 
-        return $mode === DataInterface::PRESERVE ? $to : $from;
-    }
-
-    /**
-     * @param mixed $value
-     *
-     * @return bool
-     *
-     * @psalm-pure
-     */
-    private static function isList($value): bool
-    {
-        return is_array($value) && array_values($value) === $value;
+        return $name;
     }
 }
