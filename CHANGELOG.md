@@ -1,240 +1,586 @@
-# Change Log
+# Changelog
 
-## [3.3.3] - 2024-08-10
+All notable changes to `ignition` will be documented in this file
 
-### Added
-- N/A
+## 2.17.6 - 2022-06-30
 
-### Changed
-- N/A
+### What's Changed
 
-### Fixed
-- Added fixes for making sure `?` is not passed for both DOM and DOW (#148, thank you https://github.com/LeoVie)
-- Fixed bug in Next Execution Time by sorting minutes properly (#160, thank you https://github.com/imyip)
+- notice if dots have been used in the view name by @WebPajooh in https://github.com/facade/ignition/pull/457
 
-## [3.3.2] - 2022-09-19
+### New Contributors
 
-### Added
-- N/A
+- @WebPajooh made their first contribution in https://github.com/facade/ignition/pull/457
 
-### Changed
-- Skip some daylight savings time tests for PHP 8.1 daylight savings time weirdness (#146)
+**Full Changelog**: https://github.com/facade/ignition/compare/2.17.5...2.17.6
 
-### Fixed
-- Changed string interpolations to work better with PHP 8.2 (#142)
+## 2.17.5 - 2022-02-23
 
-## [3.3.1] - 2022-01-18
+## What's Changed
 
-### Added
-- N/A
+- fix solutions section padding by @faissaloux in https://github.com/facade/ignition/pull/433
+- Bump markdown-it from 9.1.0 to 12.3.2 by @dependabot in https://github.com/facade/ignition/pull/446
+- Bump ajv from 6.10.2 to 6.12.6 by @dependabot in https://github.com/facade/ignition/pull/448
+- Fix E_NOTICE when requesting invalid script by @cweiske in https://github.com/facade/ignition/pull/449
 
-### Changed
-- N/A
+## New Contributors
 
-### Fixed
-- Fixed issue when timezones had no transition, which can occur over very short timespans (#134)
+- @faissaloux made their first contribution in https://github.com/facade/ignition/pull/433
+- @cweiske made their first contribution in https://github.com/facade/ignition/pull/449
 
-## [3.3.0] - 2022-01-13
+**Full Changelog**: https://github.com/facade/ignition/compare/2.17.4...2.17.5
 
-### Added
-- Added ability to register your own expression aliases (#132)
+## 2.17.4 - 2021-12-27
 
-### Changed
-- Changed how Day of Week and Day of Month resolve when one or the other is `*` or `?`
+- fix bug where uninitialized property within a job could break Ignition
 
-### Fixed
-- PHPStan should no longer error out
+## 2.17.3 - 2021-12-23
 
-## [3.2.4] - 2022-01-12
+- allow filtering route parameters using a `toFlare` method
 
-### Added
-- N/A
+## 2.17.2 - 2021-11-29
 
-### Changed
-- Changed how Day of Week increment/decrement to help with DST changes (#131)
+## What's Changed
 
-### Fixed
-- N/A
+- Allow overflow-x on solutions with unbreakable words by @willemvb in https://github.com/facade/ignition/pull/431
 
-## [3.2.3] - 2022-01-05
+**Full Changelog**: https://github.com/facade/ignition/compare/2.17.1...2.17.2
 
-### Added
-- N/A
+## 2.17.2 - 2021-11-29
 
-### Changed
-- Changed how minutes and hours increment/decrement to help with DST changes (#131)
+- scroll overflow on solutions
 
-### Fixed
-- N/A
+## 2.17.1 - 2021-11-25
 
-## [3.2.2] - 2022-01-05
+- streamline Livewire solutions
 
-### Added
-- N/A
+## 2.17.0 - 2021-11-24
 
-### Changed
-- Marked some methods `@internal` (#124)
+- improve recording of Livewire data
 
-### Fixed
-- Fixed issue with small ranges and large steps that caused an error with `range()` (#88)
-- Fixed issue where wraparound logic incorrectly considered high bound on range (#89)
+## 2.16.1 - 2021-11-16
 
-## [3.2.1] - 2022-01-04
+- allow sending of unbinded sql queries to Flare
 
-### Added
-- N/A
+## 2.16.0 - 2021-10-28
 
-### Changed
-- Added PHP 8.1 to testing (#125)
+- improve recording data from jobs (#416)
 
-### Fixed
-- Allow better mixture of ranges, steps, and lists (#122)
-- Fixed return order when multiple dates are requested and inverted (#121)
-- Better handling over DST (#115)
-- Fixed PHPStan tests (#130)
+## 2.15.0 - 2021-10-11
 
-## [3.2.0] - 2022-01-04
+- improve output of flare:test
 
-### Added
-- Added alias for `@midnight` (#117)
+## 2.14.1 - 2021-10-08
 
-### Changed
-- Improved testing for instance of field in tests (#105)
-- Optimization for determining multiple run dates (#75)
-- `CronExpression` properties changed from private to protected (#106)
+- update base URL for Flare
 
-### Fixed
-- N/A
+## 2.14.0 - 2021-10-01
 
-## [3.1.0] - 2020-11-24
+- add support for VScode WSL + SSH remote (#420)
 
-### Added
-- Added `CronExpression::getParts()` method to get parts of the expression as an array (#83)
+## 2.13.1 - 2021-09-13
 
-### Changed
-- Changed to Interfaces for some type hints (#97, #86)
-- Dropped minimum PHP version to 7.2
-- Few syntax changes for phpstan compatibility (#93)
+- fix namespace of `SentReports` in facade
 
-### Fixed
-- N/A
+## 2.13.0 - 2021-09-13
 
-### Deprecated
-- Deprecated `CronExpression::factory` in favor of the constructor (#56)
-- Deprecated `CronExpression::YEAR` as a formality, the functionality is already removed (#87)
+- add tracking uuid (#418)
 
-## [3.0.1] - 2020-10-12
-### Added
-- Added support for PHP 8 (#92)
-### Changed
-- N/A
-### Fixed
-- N/A
+## 2.12.1 - 2021-09-08
 
-## [3.0.0] - 2020-03-25
+- add support for VS Codium editor (#417)
 
-**MAJOR CHANGE** - In previous versions of this library, setting both a "Day of Month" and a "Day of Week" would be interpreted as an `AND` statement, not an `OR` statement. For example:
+## 2.12.0 - 2021-08-24
 
-`30 0 1 * 1`
+- add support for collecting information about jobs (#412)
 
-would evaluate to "Run 30 minutes after the 0 hour when the Day Of Month is 1 AND a Monday" instead of "Run 30 minutes after the 0 hour on Day Of Month 1 OR a Monday", where the latter is more inline with most cron systems. This means that if your cron expression has both of these fields set, you may see your expression fire more often starting with v3.0.0. 
+## 2.11.4 - 2021-08-16
 
-### Added
-- Additional docblocks for IDE and documentation
-- Added phpstan as a development dependency
-- Added a `Cron\FieldFactoryInterface` to make migrations easier (#38)
-### Changed
-- Changed some DI testing during TravisCI runs
-- `\Cron\CronExpression::determineTimezone()` now checks for `\DateTimeInterface` instead of just `\DateTime`
-- Errors with fields now report a more human-understandable error and are 1-based instead of 0-based
-- Better support for `\DateTimeImmutable` across the library by typehinting for `\DateTimeInterface` now
-- Literals should now be less case-sensative across the board
-- Changed logic for when both a Day of Week and a Day of Month are supplied to now be an OR statement, not an AND
-### Fixed
-- Fixed infinite loop when determining last day of week from literals
-- Fixed bug where single number ranges were allowed (ex: `1/10`)
-- Fixed nullable FieldFactory in CronExpression where no factory could be supplied
-- Fixed issue where logic for dropping seconds to 0 could lead to a timezone change
+- use npm ci instead of install (#411)
 
-## [2.3.1] - 2020-10-12
-### Added
-- Added support for PHP 8 (#92)
-### Changed
-- N/A
-### Fixed
-- N/A
+## 2.11.3 - 2021-08-16
 
-## [2.3.0] - 2019-03-30
-### Added
-- Added support for DateTimeImmutable via DateTimeInterface
-- Added support for PHP 7.3
-- Started listing projects that use the library
-### Changed
-- Errors should now report a human readable position in the cron expression, instead of starting at 0
-### Fixed
-- N/A
+- fix issues with circular dependencies in model route parameters (#408)
+- remove notice about dirty git state in context
+- wrap `AddGitInformation` middleware in try-catch
 
-## [2.2.0] - 2018-06-05
-### Added
-- Added support for steps larger than field ranges (#6)
-## Changed
-- N/A
-### Fixed
-- Fixed validation for numbers with leading 0s (#12)
+## 2.11.2 - 2021-07-20
 
-## [2.1.0] - 2018-04-06
-### Added
-- N/A
-### Changed
-- Upgraded to PHPUnit 6 (#2)
-### Fixed
-- Refactored timezones to deal with some inconsistent behavior (#3)
-- Allow ranges and lists in same expression (#5)
-- Fixed regression where literals were not converted to their numerical counterpart (#)
+- fix issues introduced in 2.11.1 (#403)
 
-## [2.0.0] - 2017-10-12
-### Added
-- N/A
+## 2.11.1 - 2021-07-20
 
-### Changed
-- Dropped support for PHP 5.x
-- Dropped support for the YEAR field, as it was not part of the cron standard
+- fix sending queued reports on Laravel Vapor queues (#398)
 
-### Fixed
-- Reworked validation for all the field types
-- Stepping should now work for 1-indexed fields like Month (#153)
+## 2.11.0 - 2021-07-12
 
-## [1.2.0] - 2017-01-22
-### Added
-- Added IDE, CodeSniffer, and StyleCI.IO support
+- prepare Laravel 9 support
+- remove filp/whoops dependency
+- update front-end dependencies
 
-### Changed
-- Switched to PSR-4 Autoloading
+## 2.10.2 - 2021-06-11
 
-### Fixed
-- 0 step expressions are handled better
-- Fixed `DayOfMonth` validation to be more strict
-- Typos
+- fix typo in config/flare.php (#395)
 
-## [1.1.0] - 2016-01-26
-### Added
-- Support for non-hourly offset timezones 
-- Checks for valid expressions
+## 2.10.1 - 2021-06-03
 
-### Changed
-- Max Iterations no longer hardcoded for `getRunDate()`
-- Supports DateTimeImmutable for newer PHP verions
+- fix memory leaks in Octane (#393)
 
-### Fixed
-- Fixed looping bug for PHP 7 when determining the last specified weekday of a month
+## 2.10.0 - 2021-06-03
 
-## [1.0.3] - 2013-11-23
-### Added
-- Now supports expressions with any number of extra spaces, tabs, or newlines
+- add a solution for lazy loading violations (#392)
 
-### Changed
-- Using static instead of self in `CronExpression::factory`
+## 2.9.0 - 2021-05-05
 
-### Fixed
-- Fixes issue [#28](https://github.com/mtdowling/cron-expression/issues/28) where PHP increments of ranges were failing due to PHP casting hyphens to 0
-- Only set default timezone if the given $currentTime is not a DateTime instance ([#34](https://github.com/mtdowling/cron-expression/issues/34))
+- add Xdebug format links for editor (#383)
+
+## 2.8.4 - 2021-04-29
+
+- avoid making call to Flare when no API key is specified
+
+## 2.8.3 - 2021-04-09
+
+- support Octane (#379)
+
+## 2.8.2 - 2021-04-08
+
+- censor passwords by default (#377)
+
+## 2.8.1 - 2021-04-08
+
+- add `censor_request_body_fields` default config option
+
+## 2.8.0 - 2021-04-08
+
+- add `censor_request_body_fields` config option
+
+## 2.7.0 - 2021-03-30
+
+- adds a debug warning when having debug enabled on a non-local environment (#366)
+
+## 2.6.1 - 2021-03-30
+
+- Disable executing solutions on non-local environments or from non-local IP addresses (#364)
+
+## 2.6.0 - 2021-03-24
+
+- add extra output to test command when executing verbosely
+
+## 2.5.14 - 2021-03-03
+
+- fix ignition not working when there is no argv
+
+## 2.5.13 - 2021-02-16
+
+- remove custom grouping
+
+## 2.5.12 - 2021-02-15
+
+- fix wrong config usage (#354)
+
+## 2.5.11 - 2021-02-05
+
+- fix memory leaks caused by log and query recorder (#344)
+
+## 2.5.10 - 2021-02-02
+
+- fix tinker logs not being sent to Flare
+
+## 2.5.9 - 2021-01-26
+
+- fix logged context not being sent to Flare
+
+## 2.5.8 - 2020-12-29
+
+- fix double `$` on PHP 8 (#338)
+
+## 2.5.7 - 2020-12-29
+
+- fix for breaking change in highlight.js (fixes 2.5.5)
+
+## 2.5.6 - 2020-12-29
+
+- revert to compiled js of 2.5.3
+
+## 2.5.5 - 2020-12-29
+
+- added compiled js of previous release
+
+## 2.5.4 - 2020-12-29
+
+- added support for Nova text editor (#343)
+
+## 2.5.3 - 2020-12-08
+
+- Use Livewire compatible compiler engine when using Livewire (#340)
+
+## 2.5.2 - 2020-11-14
+
+- fix `MakeViewVariableOptionalSolution` to disallow stream wrappers and files that do not end in ".blade.php" (#334)
+
+## 2.5.1 - 2020-11-13
+
+- add support for LiveWire component urls
+
+## 2.5.0 - 2020-10-27
+
+- add PHP 8.0-dev support
+- remove unnecessary `scrivo/highlight.php` dependency
+
+## 2.4.2 - 2021-03-08
+
+- fix `MakeViewVariableOptionalSolution` to disallow stream wrappers and files that do not end in .blade.php (#356)
+
+## 2.4.1 - 2020-10-14
+
+- fix copy casing
+
+## 2.4.0 - 2020-10-14
+
+- add livewire component discovery solution
+
+## 2.3.8 - 2020-10-02
+
+- Address Missing Mix Manifest Error (#317)
+
+## 2.3.7 - 2020-09-06
+
+- add loading state on share button (#309)
+- compatibility fix for L8
+
+## 2.3.6 - 2020-08-10
+
+- possible security vulnerability: bump elliptic version (#300)
+- possible XSS vulnerability: escape characters in stacktrace and exception title
+
+## 2.3.5 - 2020-08-01
+
+- catch exception in detectLineNumber for not existing blade files (#299)
+
+## 2.3.4 - 2020-07-27
+
+- fix an error that would throw a blank page when using third party extensions
+
+## 2.3.3 -2020-07-14
+
+- fix all psalm related issues
+
+## 2.3.2 - 2020-07-14
+
+- properly bind singleton (#291)
+
+## 2.3.1 - 2020-07-13
+
+- improve db name solution (#289)
+
+## 2.3.0 - 2020-07-13
+
+- allow override of Dumper via `$_SERVER variable` (#271)
+- make DumpHandler instance manually in DumpRecorder (#286)
+- only setup queues when queue is available (#287)
+
+## 2.2.0 - 2020-07-13
+
+- add `ignition:make:solution-provider` command
+
+## 2.1.0 - 2020-07-13
+
+- add "Undefined Property" solution (#264)
+
+## 2.0.10 - 2020-07-13
+
+- correctly detect dump location from ddd (#216)
+
+## 2.0.9 - 2020-07-13
+
+- use application contract instead of concrete class (#243)
+
+## 2.0.8 - 2020-07-12
+
+- do not render solution title tag for empty titles
+
+## 2.0.7 - 2020-06-07
+
+- Fix `DefaultDbNameSolutionProvider` (#277)
+
+## 2.0.6 - 2020-06-01
+
+- remove ability to fix variable names
+
+## 2.0.5 - 2020-05-29
+
+- blacklist certain variable names when fixing variable names
+
+## 2.0.4 - 2020-05-18
+
+- handle exceptions in case the request doesn't have a user (#274)
+
+## 2.0.3 - 2020-04-07
+
+- support Laravel 8
+
+## 2.0.2 - 2020-03-18
+
+- fix execute solution route not defined (#265)
+
+## 2.0.0 - 2020-02-02
+
+- adds support for Laravel 7
+- drop support for Laravel 6 and below
+- git information won't be collected by default anymore (if you need this set `collect_git_information` to `true` in the `flare` config file)
+- `MissingPackageSolutionProvider` was added to the `ignored_solution_providers` because it potentially could be slow.
+
+## 1.16.0 - 2020-01-21
+
+- add named routes (#197)
+
+## 1.15.0 - 2020-01-21
+
+- add exception to the bottom of the html (#230)
+
+## 1.14.0 - 2020-01-06
+
+- add indicator that solution is running (#212)
+
+## 1.13.1 - 2020-01-02
+
+- Remove external reference for icons (#134)
+
+## 1.13.0 - 2019-11-27
+
+- Allow custom grouping types
+
+## 1.12.1 - 2019-11-25
+
+- Detect multibyte position offsets when adding linenumbers to the blade view - Fixes #193
+
+## 1.12.0 - 2019-11-14
+
+- Add exception to html (#206)
+- Add a clear exception when passing no parameters to ddd (#205)
+- Ignore JS tests (#215)
+- Fix share report route bug
+
+## 1.11.2 - 2019-10-13
+
+- simplify default Laravel installation (#198)
+
+## 1.11.1 - 2019-10-08
+
+- add conditional line number (#182)
+
+## 1.11.0 - 2019-10-08
+
+- add better error messages for missing validation rules (#125)
+
+## 1.10.0 - 2019-10-07
+
+- Add `ignition:make-solution` command
+- Add default for query binding option (Fixes #183)
+
+## 1.9.2 - 2019-10-04
+
+- Fix service provider registration (Fixes #177)
+
+## 1.9.1 - 2019-10-01
+
+- collapse vendor frames on windows fix (#176)
+
+## 1.9.0 - 2019-09-27
+
+- add ability to send logs to flare
+- add `ddd` function
+
+## 1.8.4 - 2019-09-27
+
+- Resolve configuration from the injected app instead of the helper ([#168](https://github.com/facade/ignition/pull/168))
+
+## 1.8.3 - 2019-09-25
+
+- Remove `select-none` from error message
+- Change line clamp behaviour for longer error messages
+
+## 1.8.2 - 2019-09-20
+
+- fix for `TypeError: Cannot set property 'highlightState' of undefined`
+
+## 1.8.1 - 2019-09-20
+
+- Revert javascript assets via URL - Fixes #161
+
+## 1.8.0 - 2019-09-18
+
+- added solution for running Laravel Dusk in production ([#121](https://github.com/facade/ignition/pull/121))
+- Automatically fix blade variable typos and optional variables ([#38](https://github.com/facade/ignition/pull/38))
+
+## 1.7.1 - 2019-09-18
+
+- Use url helper to generate housekeeping endpoints
+
+## 1.7.0 - 2019-09-18
+
+- Add the ability to define a query collector max value ([#153](https://github.com/facade/ignition/pull/153))
+
+## 1.6.10 - 2019-09-18
+
+- fix `__invoke` method name in solution ([#151](https://github.com/facade/ignition/pull/151))
+
+## 1.6.9 - 2019-09-18
+
+- Add noscript trace information - fixes [#146](https://github.com/facade/ignition/issues/146)
+
+## 1.6.8 - 2019-09-18
+
+- Use javascript content type for asset response - fixes [#149](https://github.com/facade/ignition/issues/149)
+
+## 1.6.7 - 2019-09-18
+
+- Load javascript assets via URL. Fixes [#16](https://github.com/facade/ignition/issues/16)
+
+## 1.6.6 - 2019-09-16
+
+- Prevent undefined index exception in `TestCommand`
+
+## 1.6.5 - 2019-09-13
+
+- Ignore invalid characters in JSON encoding. Fixes [#138](https://github.com/facade/ignition/issues/138)
+
+## 1.6.4 - 2019-09-13
+
+- add no-index on error page
+
+## 1.6.3 - 2019-09-12
+
+- Fix `RouteNotDefinedSolutionProvider` in Laravel 5
+
+## 1.6.2 - 2019-09-12
+
+- updated publishing tag from default config
+
+## 1.6.1 - 2019-09-12
+
+- Resolve configuration from the injected application instead of the helper - Fixes [#131](https://github.com/facade/ignition/issues/131)
+
+## 1.6.0 - 2019-09-09
+
+- add `RouteNotDefined` solution provider ([#113](https://github.com/facade/ignition/pull/113))
+
+## 1.5.0 - 2019-09-09
+
+- suggest running migrations when a column is missing ([#83](https://github.com/facade/ignition/pull/83))
+
+## 1.4.19 - 2019-09-09
+
+- Remove quotation from git commit url ([#89](https://github.com/facade/ignition/pull/89))
+
+## 1.4.18 - 2019-09-09
+
+- Fix open_basedir restriction when looking up config file. Fixes ([#120](https://github.com/facade/ignition/pull/120))
+
+## 1.4.17 - 2019-09-06
+
+- Remove Inter, Operator from font stack. Fixes [#74](https://github.com/facade/ignition/issues/74)
+
+## 1.4.15 - 2019-09-05
+
+- Use previous exception trace for view exceptions. Fixes [#107](https://github.com/facade/ignition/issues/107)
+
+## 1.4.14 - 2019-09-05
+
+- Use DIRECTORY_SEPARATOR to fix an issue with blade view lookups in Windows
+
+## 1.4.13 - 2019-09-05
+
+- Use Laravel style comments
+
+## 1.4.12 - 2019-09-04
+
+- Use a middleware to protect ignition routes ([#93](https://github.com/facade/ignition/pull/93))
+
+## 1.4.11 - 2019-09-04
+
+- Use exception line number as fallbacks for view errors
+
+## 1.4.10 - 2019-09-04
+
+- Wrap solution provider lookup in a try-catch block
+
+## 1.4.9 - 2019-09-04
+
+- Lookup the first exception when linking to Telescope
+
+## 1.4.8 - 2019-09-04
+
+- pass an empty string to query if no connection name is available - fixes [#86](https://github.com/facade/ignition/issues/86)
+
+## 1.4.7 - 2019-09-04
+
+- Match whoops minimum version constraint with Laravel 6
+
+## 1.4.6 - 2019-09-04
+
+- Use empty array for default ignored solution providers
+
+## 1.4.5 - 2019-09-03
+
+- fix for new Laravel 6 installs
+
+## 1.4.4 - 2019-09-03
+
+- Suggest default database name in Laravel 6
+- Add void return type to FlareHandler::write()
+
+## 1.4.3 - 2019-09-03
+
+- allow monolog v2
+
+## 1.4.2 - 2019-09-03
+
+- style fixes
+
+## 1.4.1 - 2019-09-03
+
+- Change `remote-sites-path` and `local-sites-path` config keys to us snake case
+
+## 1.4.0 - 2019-09-03
+
+- add `enable_runnable_solutions` key to config file
+
+## 1.3.0 - 2019-09-02
+
+- add `MergeConflictSolutionProvider`
+
+## 1.2.0 - 2019-09-02
+
+- add `ignored_solution_providers` key to config file
+
+## 1.1.1 - 2019-09-02
+
+- Fixed context tab crash when not using git ([#24](https://github.com/facade/ignition/issues/24))
+
+## 1.1.0 - 2019-09-02
+
+- Fixed an error that removed the ability to register custom blade directives.
+- Fixed an error that prevented solution execution in Laravel 5.5 and 5.6
+- The "Share" button can now be disabled in the configuration file
+- Fixes an error when trying to log `null` values
+
+## 1.0.4 - 2019-09-02
+
+- Check if the authenticated user has a `toArray` method available, before collecting user data
+
+## 1.0.3 - 2019-09-02
+
+- Corrected invalid link in config file
+
+## 1.0.2 - 2019-09-02
+
+- Fixed an error in the `DefaultDbNameSolutionProvider` that could cause an infinite loop in Laravel < 5.6.28
+
+## 1.0.1 - 2019-08-31
+
+- add support for L5.5 & 5.6 ([#21](https://github.com/facade/ignition/pull/21))
+
+## 1.0.0 - 2019-08-30
+
+- initial release
