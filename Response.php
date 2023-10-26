@@ -1,161 +1,149 @@
 <?php
 
-declare(strict_types=1);
+namespace Illuminate\Auth\Access;
 
-namespace GuzzleHttp\Psr7;
+use Illuminate\Contracts\Support\Arrayable;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\StreamInterface;
-
-/**
- * PSR-7 response implementation.
- */
-class Response implements ResponseInterface
+class Response implements Arrayable
 {
-    use MessageTrait;
-
-    /** Map of standard HTTP status code/reason phrases */
-    private const PHRASES = [
-        100 => 'Continue',
-        101 => 'Switching Protocols',
-        102 => 'Processing',
-        200 => 'OK',
-        201 => 'Created',
-        202 => 'Accepted',
-        203 => 'Non-Authoritative Information',
-        204 => 'No Content',
-        205 => 'Reset Content',
-        206 => 'Partial Content',
-        207 => 'Multi-status',
-        208 => 'Already Reported',
-        300 => 'Multiple Choices',
-        301 => 'Moved Permanently',
-        302 => 'Found',
-        303 => 'See Other',
-        304 => 'Not Modified',
-        305 => 'Use Proxy',
-        306 => 'Switch Proxy',
-        307 => 'Temporary Redirect',
-        308 => 'Permanent Redirect',
-        400 => 'Bad Request',
-        401 => 'Unauthorized',
-        402 => 'Payment Required',
-        403 => 'Forbidden',
-        404 => 'Not Found',
-        405 => 'Method Not Allowed',
-        406 => 'Not Acceptable',
-        407 => 'Proxy Authentication Required',
-        408 => 'Request Time-out',
-        409 => 'Conflict',
-        410 => 'Gone',
-        411 => 'Length Required',
-        412 => 'Precondition Failed',
-        413 => 'Request Entity Too Large',
-        414 => 'Request-URI Too Large',
-        415 => 'Unsupported Media Type',
-        416 => 'Requested range not satisfiable',
-        417 => 'Expectation Failed',
-        418 => 'I\'m a teapot',
-        422 => 'Unprocessable Entity',
-        423 => 'Locked',
-        424 => 'Failed Dependency',
-        425 => 'Unordered Collection',
-        426 => 'Upgrade Required',
-        428 => 'Precondition Required',
-        429 => 'Too Many Requests',
-        431 => 'Request Header Fields Too Large',
-        451 => 'Unavailable For Legal Reasons',
-        500 => 'Internal Server Error',
-        501 => 'Not Implemented',
-        502 => 'Bad Gateway',
-        503 => 'Service Unavailable',
-        504 => 'Gateway Time-out',
-        505 => 'HTTP Version not supported',
-        506 => 'Variant Also Negotiates',
-        507 => 'Insufficient Storage',
-        508 => 'Loop Detected',
-        510 => 'Not Extended',
-        511 => 'Network Authentication Required',
-    ];
-
-    /** @var string */
-    private $reasonPhrase;
-
-    /** @var int */
-    private $statusCode;
+    /**
+     * Indicates whether the response was allowed.
+     *
+     * @var bool
+     */
+    protected $allowed;
 
     /**
-     * @param int                                  $status  Status code
-     * @param array<string, string|string[]>       $headers Response headers
-     * @param string|resource|StreamInterface|null $body    Response body
-     * @param string                               $version Protocol version
-     * @param string|null                          $reason  Reason phrase (when empty a default will be used based on the status code)
+     * The response message.
+     *
+     * @var string|null
      */
-    public function __construct(
-        int $status = 200,
-        array $headers = [],
-        $body = null,
-        string $version = '1.1',
-        string $reason = null
-    ) {
-        $this->assertStatusCodeRange($status);
+    protected $message;
 
-        $this->statusCode = $status;
+    /**
+     * The response code.
+     *
+     * @var mixed
+     */
+    protected $code;
 
-        if ($body !== '' && $body !== null) {
-            $this->stream = Utils::streamFor($body);
-        }
-
-        $this->setHeaders($headers);
-        if ($reason == '' && isset(self::PHRASES[$this->statusCode])) {
-            $this->reasonPhrase = self::PHRASES[$this->statusCode];
-        } else {
-            $this->reasonPhrase = (string) $reason;
-        }
-
-        $this->protocol = $version;
-    }
-
-    public function getStatusCode(): int
+    /**
+     * Create a new response.
+     *
+     * @param  bool  $allowed
+     * @param  string  $message
+     * @param  mixed  $code
+     * @return void
+     */
+    public function __construct($allowed, $message = '', $code = null)
     {
-        return $this->statusCode;
-    }
-
-    public function getReasonPhrase(): string
-    {
-        return $this->reasonPhrase;
-    }
-
-    public function withStatus($code, $reasonPhrase = ''): ResponseInterface
-    {
-        $this->assertStatusCodeIsInteger($code);
-        $code = (int) $code;
-        $this->assertStatusCodeRange($code);
-
-        $new = clone $this;
-        $new->statusCode = $code;
-        if ($reasonPhrase == '' && isset(self::PHRASES[$new->statusCode])) {
-            $reasonPhrase = self::PHRASES[$new->statusCode];
-        }
-        $new->reasonPhrase = (string) $reasonPhrase;
-
-        return $new;
+        $this->code = $code;
+        $this->allowed = $allowed;
+        $this->message = $message;
     }
 
     /**
-     * @param mixed $statusCode
+     * Create a new "allow" Response.
+     *
+     * @param  string|null  $message
+     * @param  mixed  $code
+     * @return \Illuminate\Auth\Access\Response
      */
-    private function assertStatusCodeIsInteger($statusCode): void
+    public static function allow($message = null, $code = null)
     {
-        if (filter_var($statusCode, FILTER_VALIDATE_INT) === false) {
-            throw new \InvalidArgumentException('Status code must be an integer value.');
-        }
+        return new static(true, $message, $code);
     }
 
-    private function assertStatusCodeRange(int $statusCode): void
+    /**
+     * Create a new "deny" Response.
+     *
+     * @param  string|null  $message
+     * @param  mixed  $code
+     * @return \Illuminate\Auth\Access\Response
+     */
+    public static function deny($message = null, $code = null)
     {
-        if ($statusCode < 100 || $statusCode >= 600) {
-            throw new \InvalidArgumentException('Status code must be an integer value between 1xx and 5xx.');
+        return new static(false, $message, $code);
+    }
+
+    /**
+     * Determine if the response was allowed.
+     *
+     * @return bool
+     */
+    public function allowed()
+    {
+        return $this->allowed;
+    }
+
+    /**
+     * Determine if the response was denied.
+     *
+     * @return bool
+     */
+    public function denied()
+    {
+        return ! $this->allowed();
+    }
+
+    /**
+     * Get the response message.
+     *
+     * @return string|null
+     */
+    public function message()
+    {
+        return $this->message;
+    }
+
+    /**
+     * Get the response code / reason.
+     *
+     * @return mixed
+     */
+    public function code()
+    {
+        return $this->code;
+    }
+
+    /**
+     * Throw authorization exception if response was denied.
+     *
+     * @return \Illuminate\Auth\Access\Response
+     *
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function authorize()
+    {
+        if ($this->denied()) {
+            throw (new AuthorizationException($this->message(), $this->code()))
+                        ->setResponse($this);
         }
+
+        return $this;
+    }
+
+    /**
+     * Convert the response to an array.
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        return [
+            'allowed' => $this->allowed(),
+            'message' => $this->message(),
+            'code' => $this->code(),
+        ];
+    }
+
+    /**
+     * Get the string representation of the message.
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return (string) $this->message();
     }
 }

@@ -1,6 +1,6 @@
 {
-    "name": "illuminate/broadcasting",
-    "description": "The Illuminate Broadcasting package.",
+    "name": "illuminate/bus",
+    "description": "The Illuminate Bus package.",
     "license": "MIT",
     "homepage": "https://laravel.com",
     "support": {
@@ -15,17 +15,14 @@
     ],
     "require": {
         "php": "^7.3|^8.0",
-        "ext-json": "*",
-        "psr/log": "^1.0|^2.0",
-        "illuminate/bus": "^8.0",
         "illuminate/collections": "^8.0",
         "illuminate/contracts": "^8.0",
-        "illuminate/queue": "^8.0",
+        "illuminate/pipeline": "^8.0",
         "illuminate/support": "^8.0"
     },
     "autoload": {
         "psr-4": {
-            "Illuminate\\Broadcasting\\": ""
+            "Illuminate\\Bus\\": ""
         }
     },
     "extra": {
@@ -34,8 +31,7 @@
         }
     },
     "suggest": {
-        "ably/ably-php": "Required to use the Ably broadcast driver (^1.0).",
-        "pusher/pusher-php-server": "Required to use the Pusher broadcast driver (^4.0|^5.0|^6.0|^7.0)."
+        "illuminate/queue": "Required to use closures when chaining jobs (^7.0)."
     },
     "config": {
         "sort-packages": true
