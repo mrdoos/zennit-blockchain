@@ -159,5 +159,5 @@ This project is licensed under the [MIT License](LICENSE.md) - see the [LICENSE.
 ---
 
 Thank you for being a part of the Zennit Blockchain Project! Happy coding and happy trading! 🚀🌟
-<img src="_95438bb6-f45b-4211-a355-6d8d88a882c6.jpeg" width="600" height="600">
+<img src="_95438bb6-f45b-4211-a355-6d8d88a882c6.jpeg" >
 
