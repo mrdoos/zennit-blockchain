@@ -1,83 +1,38 @@
-# Stack/Cors
+# Instantiator
 
-Library and middleware enabling cross-origin resource sharing for your
-http-{foundation,kernel} using application. It attempts to implement the
-[W3C Recommendation] for cross-origin resource sharing.
+This library provides a way of avoiding usage of constructors when instantiating PHP classes.
 
-[W3C Recommendation]: http://www.w3.org/TR/cors/
+[![Build Status](https://travis-ci.org/doctrine/instantiator.svg?branch=master)](https://travis-ci.org/doctrine/instantiator)
+[![Code Coverage](https://codecov.io/gh/doctrine/instantiator/branch/master/graph/badge.svg)](https://codecov.io/gh/doctrine/instantiator/branch/master)
+[![Dependency Status](https://www.versioneye.com/package/php--doctrine--instantiator/badge.svg)](https://www.versioneye.com/package/php--doctrine--instantiator)
 
-Build status: ![.github/workflows/run-tests.yml](https://github.com/asm89/stack-cors/workflows/.github/workflows/run-tests.yml/badge.svg)
+[![Latest Stable Version](https://poser.pugx.org/doctrine/instantiator/v/stable.png)](https://packagist.org/packages/doctrine/instantiator)
+[![Latest Unstable Version](https://poser.pugx.org/doctrine/instantiator/v/unstable.png)](https://packagist.org/packages/doctrine/instantiator)
 
 ## Installation
 
-Require `asm89/stack-cors` using composer.
+The suggested installation method is via [composer](https://getcomposer.org/):
+
+```sh
+composer require doctrine/instantiator
+```
 
 ## Usage
 
-This package can be used as a library or as [stack middleware].
-
-[stack middleware]: http://stackphp.com/
-
-### Options
-
-| Option                 | Description                                                | Default value |
-|------------------------|------------------------------------------------------------|---------------|
-| allowedMethods         | Matches the request method.                                | `[]`          |
-| allowedOrigins         | Matches the request origin.                                | `[]`          |
-| allowedOriginsPatterns | Matches the request origin with `preg_match`.              | `[]`          |
-| allowedHeaders         | Sets the Access-Control-Allow-Headers response header.     | `[]`          |
-| exposedHeaders         | Sets the Access-Control-Expose-Headers response header.    | `false`       |
-| maxAge                 | Sets the Access-Control-Max-Age response header.           | `false`       |
-| supportsCredentials    | Sets the Access-Control-Allow-Credentials header.          | `false`       |
-
-The _allowedMethods_ and _allowedHeaders_ options are case-insensitive.
-
-You don't need to provide both _allowedOrigins_ and _allowedOriginsPatterns_. If one of the strings passed matches, it is considered a valid origin.
-
-If `['*']` is provided to _allowedMethods_, _allowedOrigins_ or _allowedHeaders_ all methods / origins / headers are allowed.
-
-### Example: using the library
+The instantiator is able to create new instances of any class without using the constructor or any API of the class
+itself:
 
 ```php
-<?php
+$instantiator = new \Doctrine\Instantiator\Instantiator();
 
-use Asm89\Stack\CorsService;
-
-$cors = new CorsService([
-    'allowedHeaders'         => ['x-allowed-header', 'x-other-allowed-header'],
-    'allowedMethods'         => ['DELETE', 'GET', 'POST', 'PUT'],
-    'allowedOrigins'         => ['http://localhost'],
-    'allowedOriginsPatterns' => ['/localhost:\d/'],
-    'exposedHeaders'         => false,
-    'maxAge'                 => false,
-    'supportsCredentials'    => false,
-]);
-
-$cors->addActualRequestHeaders(Response $response, $origin);
-$cors->handlePreflightRequest(Request $request);
-$cors->isActualRequestAllowed(Request $request);
-$cors->isCorsRequest(Request $request);
-$cors->isPreflightRequest(Request $request);
+$instance = $instantiator->instantiate(\My\ClassName\Here::class);
 ```
 
-## Example: using the stack middleware
+## Contributing
 
-```php
-<?php
+Please read the [CONTRIBUTING.md](CONTRIBUTING.md) contents if you wish to help out!
 
-use Asm89\Stack\Cors;
+## Credits
 
-$app = new Cors($app, [
-    // you can use ['*'] to allow any headers
-    'allowedHeaders'      => ['x-allowed-header', 'x-other-allowed-header'],
-    // you can use ['*'] to allow any methods
-    'allowedMethods'      => ['DELETE', 'GET', 'POST', 'PUT'],
-    // you can use ['*'] to allow requests from any origin
-    'allowedOrigins'      => ['localhost'],
-    // you can enter regexes that are matched to the origin request header
-    'allowedOriginsPatterns' => ['/localhost:\d/'],
-    'exposedHeaders'      => false,
-    'maxAge'              => false,
-    'supportsCredentials' => false,
-]);
-```
+This library was migrated from [ocramius/instantiator](https://github.com/Ocramius/Instantiator), which
+has been donated to the doctrine organization, and which is now deprecated in favour of this package.
