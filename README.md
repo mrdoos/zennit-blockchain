@@ -1,30 +1,36 @@
-# Ignition: a beautiful error page for Laravel apps
+# Send PHP errors to Flare
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/facade/ignition.svg?style=flat-square)](https://packagist.org/packages/facade/ignition)
-![Tests](https://github.com/facade/ignition/workflows/Run%20tests/badge.svg)
-[![Total Downloads](https://img.shields.io/packagist/dt/facade/ignition.svg?style=flat-square)](https://packagist.org/packages/facade/ignition)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/facade/flare-client-php.svg?style=flat-square)](https://packagist.org/packages/facade/flare-client-php)
+![Tests](https://github.com/facade/flare-client-php/workflows/Run%20tests/badge.svg)
+[![Total Downloads](https://img.shields.io/packagist/dt/facade/flare-client-php.svg?style=flat-square)](https://packagist.org/packages/facade/flare-client-php)
 
-[Ignition](https://flareapp.io/docs/ignition-for-laravel/introduction) is a beautiful and customizable error page for Laravel applications running on Laravel 5.5 up Laravel 8. It is the default error page for all Laravel 6 applications. It also allows to publicly share your errors on [Flare](https://flareapp.io). If configured with a valid Flare API key, your errors in production applications will be tracked, and you'll get notified when they happen.
+This repository contains a PHP client to send PHP errors to [Flare](https://flareapp.io).
 
-## Using Laravel 8 or above?
+![Screenshot of error in Flare](https://facade.github.io/flare-client-php/screenshot.png)
 
-If you're on Laravel 8 or above, you can switch to [spatie/laravel-ignition](https://github.com/spatie/laravel-ignition), which is a drop-in replacement.
-Replace `facade/ignition` with `"spatie/laravel-ignition": "^1.0"` in your application's `composer.json` file.
+## Documentation
 
-Going forward, we'll only add security fixes to facade/ignition and highly encourage you to switch to spatie/laravel-ignition.
+You can find the documentation of this package at [the docs of Flare](https://flareapp.io/docs/general/projects).
 
-## Official Documentation
+## Changelog
 
-The official documentation for Ignition can be found on the [Flare website](https://flareapp.io/docs/ignition-for-laravel/installation).
+Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
 
-### Changelog
+## Testing
 
-Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recently.
+``` bash
+composer test
+```
 
 ## Contributing
 
 Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
+## Security
+
+If you discover any security related issues, please email support@flareapp.io instead of using the issue tracker.
+
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+

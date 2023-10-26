@@ -1,31 +1,17 @@
 <?php
 
-use Facade\FlareClient\Flare;
-
-if (! function_exists('ddd')) {
-    function ddd()
+if (! function_exists('array_merge_recursive_distinct')) {
+    function array_merge_recursive_distinct(array &$array1, array &$array2)
     {
-        $args = func_get_args();
-
-        if (count($args) === 0) {
-            throw new Exception('You should pass at least 1 argument to `ddd`');
+        $merged = $array1;
+        foreach ($array2 as $key => &$value) {
+            if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])) {
+                $merged[$key] = array_merge_recursive_distinct($merged[$key], $value);
+            } else {
+                $merged[$key] = $value;
+            }
         }
 
-        call_user_func_array('dump', $args);
-
-        $handler = app(\Facade\Ignition\ErrorPage\ErrorPageHandler::class);
-
-        $client = app()->make(Flare::class);
-
-        $report = $client->createReportFromMessage('Dump, Die, Debug', 'info');
-
-        $handler->handleReport($report, 'DebugTab', [
-            'dump' => true,
-            'glow' => false,
-            'log' => false,
-            'query' => false,
-        ]);
-
-        die();
+        return $merged;
     }
 }
