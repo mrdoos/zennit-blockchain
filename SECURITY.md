@@ -1,3 +1,12 @@
 # Security Policy
 
-For security related problems, please don't use the public issue tracker, but mail info@spatie.be.
+## Supported Versions
+
+Only the latest released version of Whoops is supported.
+To facilitate upgrades we almost never make backwards-incompatible changes.
+
+## Reporting a Vulnerability
+
+Please report vulnerabilities over email, by sending an email to `denis` at `sokolov` dot `cc`.
+
+

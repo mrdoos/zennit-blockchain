@@ -1,29 +1,9 @@
 <?php
 
-namespace Faker\Provider\de_AT;
+namespace Faker\Provider\en_GB;
 
 class Payment extends \Faker\Provider\Payment
 {
-    /**
-     * Value Added Tax (VAT)
-     *
-     * @example 'ATU12345678', ('spaced') 'AT U12345678'
-     *
-     * @see http://ec.europa.eu/taxation_customs/vies/faq.html?locale=en#item_11
-     * @see http://www.iecomputersystems.com/ordering/eu_vat_numbers.htm
-     * @see http://en.wikipedia.org/wiki/VAT_identification_number
-     *
-     * @param bool $spacedNationalPrefix
-     *
-     * @return string VAT Number
-     */
-    public static function vat($spacedNationalPrefix = true)
-    {
-        $prefix = $spacedNationalPrefix ? 'AT U' : 'ATU';
-
-        return sprintf('%s%d', $prefix, self::randomNumber(8, true));
-    }
-
     /**
      * International Bank Account Number (IBAN)
      *
@@ -35,7 +15,7 @@ class Payment extends \Faker\Provider\Payment
      *
      * @return string
      */
-    public static function bankAccountNumber($prefix = '', $countryCode = 'AT', $length = null)
+    public static function bankAccountNumber($prefix = '', $countryCode = 'GB', $length = null)
     {
         return static::iban($countryCode, $prefix, $length);
     }
